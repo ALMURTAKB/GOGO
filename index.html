@@ -93,7 +93,7 @@
 
     .discount-price {
       font-size: 22px;
-      color: #4caf50;
+      color: #4CAF50;
       text-align: center;
       margin-bottom: 20px;
       font-weight: bold;
@@ -223,9 +223,9 @@
     </ul>
 
     <div class="discount-price">بعد الخصم: 4,000,000 دينار عراقي فقط!</div>
-    <div class="price">السعر: 4,550,000 دينار عراقي</div>
+    <div class="price">السعر الأصلي: 4,550,000 دينار عراقي</div>
 
-    <form id="orderForm" action="https://formspree.io/f/mwpqnjzv" method="POST">
+    <form id="orderForm">
       <label for="name">الاسم الكامل</label>
       <input type="text" id="name" name="name" required />
 
@@ -275,34 +275,52 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
+      authDomain: "gogo-580c9.firebaseapp.com",
+      projectId: "gogo-580c9",
+      storageBucket: "gogo-580c9.firebasestorage.app",
+      messagingSenderId: "1017270070832",
+      appId: "1:1017270070832:web:802137b9719a1c525747f5",
+      measurementId: "G-YRNMSSYD1W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     function changeMainImage(src) {
       document.getElementById('mainImage').src = src;
     }
 
-    document.getElementById('orderForm').addEventListener('submit', function (event) {
-      event.preventDefault(); // يمنع الإرسال الحقيقي
-      document.getElementById('confirmationMessage').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // التمرير للأعلى
-      this.reset(); // إعادة تعيين النموذج
+    document.getElementById('orderForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
 
-      // ارسال البيانات عبر Formspree (fetch)
-      const form = event.target;
-      fetch(form.action, {
-        method: form.method,
-        body: new FormData(form),
-        headers: {
-          'Accept': 'application/json'
-        },
-      }).then(response => {
-        if (response.ok) {
-          console.log('تم إرسال الطلب بنجاح');
-        } else {
-          console.error('حدث خطأ أثناء الإرسال');
-        }
-      }).catch(error => {
-        console.error('خطأ في الاتصال:', error);
-      });
+      const form = this;
+
+      const data = {
+        name: form.name.value.trim(),
+        governorate: form.governorate.value,
+        address1: form.address1.value.trim(),
+        address2: form.address2.value.trim(),
+        landmark: form.landmark.value.trim(),
+        phone1: form.phone1.value.trim(),
+        phone2: form.phone2.value.trim(),
+        createdAt: new Date()
+      };
+
+      try {
+        await addDoc(collection(db, "orders"), data);
+        document.getElementById('confirmationMessage').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        form.reset();
+      } catch (error) {
+        alert("❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.");
+        console.error("Firestore error:", error);
+      }
     });
   </script>
 </body>
