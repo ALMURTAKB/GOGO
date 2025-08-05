@@ -101,7 +101,7 @@
 
       orders.forEach(order => {
         // جهز القيم مع التعامل مع القيم الفارغة
-        const product = order.product || "-";
+        const product = order.productName || "-";
         const phone1 = order.phone1 || "-";
         const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
         const address1 = order.address1 || "-";
@@ -113,7 +113,7 @@
 
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
-            <td class="p-3 border-b">${product}</td>
+            <td class="p-3 border-b">${productName}</td>
             <td class="p-3 border-b">${phone1}</td>
             <td class="p-3 border-b">${phone2}</td>
             <td class="p-3 border-b">${address1}</td>
@@ -161,3 +161,4 @@
   </script>
 </body>
 </html>
+
