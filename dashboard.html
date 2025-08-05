@@ -5,17 +5,64 @@
   <title>لوحة تحكم الطلبات</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
-    th { background-color: #f2f2f2; }
-    button.logout { margin-top: 10px; background-color: #f44336; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; }
+    body {
+      font-family: 'Tahoma', sans-serif;
+      direction: rtl;
+      margin: 20px;
+      background: #f7f9fc;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: right;
+      font-size: 14px;
+    }
+    th {
+      background-color: #4caf50;
+      color: white;
+    }
+    select {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 6px 12px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    #errorMessage {
+      color: red;
+      font-weight: bold;
+      margin: 20px 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
+
   <h2>لوحة تحكم الطلبات</h2>
-  <button class="logout" id="logoutBtn">تسجيل خروج</button>
-  <table id="ordersTable">
+  <div id="errorMessage"></div>
+  <table>
     <thead>
       <tr>
         <th>الاسم</th>
@@ -24,21 +71,31 @@
         <th>الهاتف</th>
         <th>المنتج</th>
         <th>تاريخ الطلب</th>
+        <th>حالة الطلب</th>
+        <th>تحديث الحالة</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="ordersTableBody">
+      <!-- سيتم تعبئة الطلبات هنا -->
+    </tbody>
   </table>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      updateDoc,
+      Timestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
       authDomain: "gogo-580c9.firebaseapp.com",
       projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.appspot.com",
+      storageBucket: "gogo-580c9.firebasestorage.app",
       messagingSenderId: "1017270070832",
       appId: "1:1017270070832:web:802137b9719a1c525747f5",
       measurementId: "G-YRNMSSYD1W"
@@ -46,49 +103,82 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
 
-    // تحقق تسجيل الدخول
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        loadOrders();
-      } else {
-        // اذا ما مسجل دخول اعد التوجيه لصفحة الدخول
-        window.location.href = "login.html";
-      }
-    });
+    const ordersTableBody = document.getElementById("ordersTableBody");
+    const errorMessage = document.getElementById("errorMessage");
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = "login.html";
-      });
-    });
+    // حالات الطلب الممكنة
+    const orderStates = ["معلق", "تم التنفيذ", "ملغى"];
 
     async function loadOrders() {
-      const tableBody = document.querySelector("#ordersTable tbody");
-      tableBody.innerHTML = "";
-
       try {
+        errorMessage.textContent = "";
+        ordersTableBody.innerHTML = "";
+
         const querySnapshot = await getDocs(collection(db, "orders"));
-        querySnapshot.forEach(doc => {
-          const data = doc.data();
-          const row = `
-            <tr>
-              <td>${data.name || ''}</td>
-              <td>${data.governorate || ''}</td>
-              <td>${data.address1 || ''} ${data.address2 || ''}</td>
-              <td>${data.phone1 || ''} ${data.phone2 || ''}</td>
-              <td>${data.productName || ''}</td>
-              <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString() : ''}</td>
+
+        if (querySnapshot.empty) {
+          ordersTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">لا توجد طلبات حتى الآن.</td></tr>`;
+          return;
+        }
+
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const id = docSnap.id;
+          const createdAt = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toLocaleString() : "";
+          const orderState = data.orderState || "معلق"; // إذا ما كان موجود خلي "معلق"
+
+          // عنوان كامل مدمج
+          const fullAddress = `${data.address1 || ""} ${data.address2 || ""} ${data.landmark || ""}`;
+
+          // رقم الهاتف مدمج
+          const phone = `${data.phone1 || ""} ${data.phone2 || ""}`;
+
+          ordersTableBody.innerHTML += `
+            <tr data-id="${id}">
+              <td>${data.name || "-"}</td>
+              <td>${data.governorate || "-"}</td>
+              <td>${fullAddress}</td>
+              <td>${phone}</td>
+              <td>${data.productName || "-"}</td>
+              <td>${createdAt}</td>
+              <td class="current-state">${orderState}</td>
+              <td>
+                <select class="state-select">
+                  ${orderStates.map(state => `<option value="${state}" ${state === orderState ? "selected" : ""}>${state}</option>`).join('')}
+                </select>
+                <button class="update-btn">تحديث</button>
+              </td>
             </tr>
           `;
-          tableBody.innerHTML += row;
         });
+
+        // أضف مستمع أحداث لأزرار التحديث
+        document.querySelectorAll(".update-btn").forEach(button => {
+          button.addEventListener("click", async (e) => {
+            const tr = e.target.closest("tr");
+            const id = tr.getAttribute("data-id");
+            const select = tr.querySelector(".state-select");
+            const newState = select.value;
+
+            try {
+              await updateDoc(doc(db, "orders", id), { orderState: newState });
+              tr.querySelector(".current-state").textContent = newState;
+              alert("✅ تم تحديث حالة الطلب بنجاح.");
+            } catch (error) {
+              alert("❌ حدث خطأ أثناء تحديث حالة الطلب.");
+              console.error("Update error:", error);
+            }
+          });
+        });
+
       } catch (error) {
-        alert("حدث خطأ أثناء تحميل الطلبات.");
-        console.error(error);
+        console.error("Error loading orders:", error);
+        errorMessage.textContent = "❌ حدث خطأ أثناء تحميل الطلبات. تحقق من إعدادات Firebase والقواعد.";
       }
     }
+
+    loadOrders();
   </script>
 </body>
 </html>
