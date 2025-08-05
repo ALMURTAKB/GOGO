@@ -117,7 +117,7 @@
       }
 
       orders.forEach(order => {
-        const clientName = order.clientName || "-";
+        const name = order.name || "-";
         const productName = order.productName || "-";
         const phone1 = order.phone1 || "-";
         const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
@@ -128,7 +128,7 @@
 
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
-            <td class="p-3 border-b">${clientName}</td>
+            <td class="p-3 border-b">${name}</td>
             <td class="p-3 border-b">${productName}</td>
             <td class="p-3 border-b">${phone1}</td>
             <td class="p-3 border-b">${phone2}</td>
@@ -179,3 +179,4 @@
   </script>
 </body>
 </html>
+
