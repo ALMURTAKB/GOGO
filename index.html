@@ -2,308 +2,177 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>طلب المنتج</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: 'Tahoma', sans-serif;
-      background: linear-gradient(135deg, #f5f7fa, #d7e1ec);
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #4CAF50;
-      color: white;
-      text-align: center;
-      padding: 25px 15px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    header h1 {
-      margin: 0;
-      font-size: 26px;
-      letter-spacing: 1px;
-    }
-    header p {
-      margin-top: 8px;
-      font-size: 15px;
-      color: #e0f7e9;
-    }
-    .container {
-      max-width: 500px;
-      margin: 30px auto;
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      padding: 25px 20px;
-    }
-    img.main-img {
-      width: 100%;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-    }
-    img.main-img:hover {
-      transform: scale(1.03);
-    }
-    .image-gallery {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 15px 0 25px 0;
-      flex-wrap: wrap;
-    }
-    .image-gallery img {
-      width: 140px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-    .image-gallery img:hover {
-      transform: scale(1.1);
-      border-color: #4caf50;
-    }
-    h2 {
-      font-size: 24px;
-      margin: 10px 0;
-      color: #333;
-      text-align: center;
-    }
-    .price {
-      font-size: 20px;
-      color: #e91e63;
-      margin-bottom: 5px;
-      font-weight: bold;
-      text-align: center;
-      text-decoration: line-through;
-    }
-    .discount-price {
-      font-size: 22px;
-      color: #4CAF50;
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-    .car-specs {
-      list-style: none;
-      padding: 15px;
-      margin: 0 0 25px 0;
-      font-size: 16px;
-      color: #444;
-      background: #f9f9f9;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-    }
-    .car-specs li {
-      margin-bottom: 8px;
-    }
-    form {
-      text-align: right;
-    }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
-      color: #444;
-      font-size: 14px;
-    }
-    input,
-    textarea,
-    select {
-      width: 100%;
-      padding: 11px 12px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      margin-top: 6px;
-      font-size: 15px;
-      background-color: #f9f9f9;
-      box-sizing: border-box;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-      transition: 0.3s;
-    }
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: #4caf50;
-      background-color: #fff;
-      outline: none;
-      box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
-    }
-    button {
-      margin-top: 22px;
-      width: 100%;
-      padding: 14px;
-      background-color: #4caf50;
-      color: white;
-      font-size: 17px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background-color: #43a047;
-    }
-    .confirmation {
-      display: none;
-      background-color: #dff0d8;
-      color: #3c763d;
-      padding: 12px;
-      border-radius: 10px;
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(0, 128, 0, 0.1);
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لوحة تحكم الطلبات</title>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-  <header>
-    <h1>مرحبا بك في GOGO!</h1>
-    <p>منتجات أصلية – توصيل سريع – خدمة موثوقة</p>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white flex justify-between items-center px-6 py-4 shadow">
+    <div class="flex items-center gap-4">
+      <input type="file" id="logoUploader" class="hidden" onchange="uploadLogo(event)" />
+      <img id="logo" src="https://via.placeholder.com/50" alt="Logo" class="h-10 w-10 rounded-full cursor-pointer" onclick="document.getElementById('logoUploader').click()">
+      <h1 class="text-2xl font-bold">لوحة تحكم الطلبات</h1>
+    </div>
+    <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition">تسجيل الخروج</button>
   </header>
 
-  <div class="container">
-    <img
-      src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-      alt="صورة سيارة كيا موديل 2017"
-      class="main-img"
-      id="mainImage"
-    />
-    <div class="image-gallery">
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة جانبية"
-        onclick="changeMainImage(this.src)"
-      />
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة أمامية"
-        onclick="changeMainImage(this.src)"
-      />
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة داخلية"
-        onclick="changeMainImage(this.src)"
-      />
-    </div>
+  <!-- Main -->
+  <div class="flex flex-1">
 
-    <h2 id="productNameTitle">سيارة نوع كيا موديل 2017</h2>
-
-    <ul class="car-specs">
-      <li><strong>اللون:</strong> فضي</li>
-      <li><strong>عدد الكيلومترات:</strong> 120,000 كم</li>
-      <li><strong>ناقل الحركة:</strong> أوتوماتيك</li>
-      <li><strong>الحالة:</strong> بحالة ممتازة</li>
-      <li><strong>الوقود:</strong> بنزين</li>
-      <li><strong>الدفع:</strong> أمامي</li>
-    </ul>
-
-    <div class="discount-price">بعد الخصم: 4,000,000 دينار عراقي فقط!</div>
-    <div class="price">السعر الأصلي: 4,550,000 دينار عراقي</div>
-
-    <form id="orderForm">
-      <label for="name">الاسم الكامل</label>
-      <input type="text" id="name" name="name" required />
-
-      <label for="governorate">المحافظة</label>
-      <select id="governorate" name="governorate" required>
-        <option value="">اختر المحافظة</option>
-        <option value="بغداد">بغداد</option>
-        <option value="البصرة">البصرة</option>
-        <option value="نينوى">نينوى</option>
-        <option value="كربلاء">كربلاء</option>
-        <option value="النجف">النجف</option>
-        <option value="ذي قار">ذي قار</option>
-        <option value="بابل">بابل</option>
-        <option value="الأنبار">الأنبار</option>
-        <option value="كركوك">كركوك</option>
-        <option value="أربيل">أربيل</option>
-        <option value="السليمانية">السليمانية</option>
-        <option value="ديالى">ديالى</option>
-        <option value="واسط">واسط</option>
-        <option value="القادسية">القادسية</option>
-        <option value="ميسان">ميسان</option>
-        <option value="المثنى">المثنى</option>
-        <option value="صلاح الدين">صلاح الدين</option>
-        <option value="دهوك">دهوك</option>
+    <!-- Sidebar Filter -->
+    <aside class="w-64 bg-white p-4 shadow">
+      <h2 class="text-xl font-semibold mb-4">تصفية الطلبات</h2>
+      <select id="filter" onchange="filterOrders()" class="w-full p-2 border border-gray-300 rounded">
+        <option value="all">الكل</option>
+        <option value="قيد التنفيذ">قيد التنفيذ</option>
+        <option value="ملغي">ملغي</option>
+        <option value="مكتمل ✅">مكتمل</option>
       </select>
+    </aside>
 
-      <label for="address1">العنوان الأول</label>
-      <input type="text" id="address1" name="address1" required />
-
-      <label for="address2">العنوان الثاني (اختياري)</label>
-      <input type="text" id="address2" name="address2" />
-
-      <label for="landmark">أقرب نقطة دالة</label>
-      <input type="text" id="landmark" name="landmark" required />
-
-      <label for="phone1">رقم الهاتف الأساسي</label>
-      <input type="tel" id="phone1" name="phone1" required />
-
-      <label for="phone2">رقم الهاتف الثانوي (اختياري)</label>
-      <input type="tel" id="phone2" name="phone2" />
-
-      <button type="submit">إرسال الطلب</button>
-    </form>
-
-    <div id="confirmationMessage" class="confirmation">
-      ✅ تم استلام طلبك بنجاح! سنقوم بالتواصل معك قريبًا.
-    </div>
+    <!-- Orders Table -->
+    <main class="flex-1 p-6 overflow-auto">
+      <table class="w-full table-auto border-collapse bg-white rounded-lg overflow-hidden shadow">
+        <thead class="bg-blue-100 text-blue-900">
+          <tr>
+            <th class="p-3 text-right border-b">اسم العميل</th>
+            <th class="p-3 text-right border-b">المنتج</th>
+            <th class="p-3 text-right border-b">المحافظة</th>
+            <th class="p-3 text-right border-b">هاتف 1</th>
+            <th class="p-3 text-right border-b">هاتف 2</th>
+            <th class="p-3 text-right border-b">العنوان ١</th>
+            <th class="p-3 text-right border-b">العنوان ٢</th>
+            <th class="p-3 text-right border-b">تاريخ ووقت الطلب</th>
+            <th class="p-3 text-right border-b">الحالة</th>
+            <th class="p-3 text-center border-b">تحديث الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="orders" class="text-gray-800">
+          <!-- الطلبات تظهر هنا -->
+        </tbody>
+      </table>
+    </main>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <!-- Footer -->
+  <footer class="text-center text-sm text-gray-600 mt-6 mb-2">
+    تم برمجته من قبل <span class="font-semibold text-blue-700">المرتقب</span> باستخدام الذكاء الاصطناعي.
+  </footer>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
-      authDomain: "gogo-580c9.firebaseapp.com",
-      projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.firebasestorage.app",
-      messagingSenderId: "1017270070832",
-      appId: "1:1017270070832:web:802137b9719a1c525747f5",
-      measurementId: "G-YRNMSSYD1W"
-    };
+  <!-- استدعاء ملف تكوين Firebase -->
+  <script src="./firebaseConfig.js"></script>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    function changeMainImage(src) {
-      document.getElementById('mainImage').src = src;
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";  // صفحة تسجيل الدخول
+      });
     }
 
-    document.getElementById('orderForm').addEventListener('submit', async function (event) {
-      event.preventDefault();
+    // دالة لتنسيق التاريخ والوقت بشكل عربي مقروء
+    function formatTimestamp(timestamp) {
+      if (!timestamp) return "-";
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleString("ar-EG", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
+    }
 
-      const form = this;
-      const productName = document.getElementById('productNameTitle').textContent.trim();
+    let allOrders = [];
 
-      const data = {
-        name: form.name.value.trim(),
-        governorate: form.governorate.value,
-        address1: form.address1.value.trim(),
-        address2: form.address2.value.trim(),
-        landmark: form.landmark.value.trim(),
-        phone1: form.phone1.value.trim(),
-        phone2: form.phone2.value.trim(),
-        productName: productName,
-        createdAt: new Date()
+    function fetchOrders() {
+      db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        displayOrders(allOrders);
+      });
+    }
+
+    function displayOrders(orders) {
+      const ordersContainer = document.getElementById("orders");
+      ordersContainer.innerHTML = "";
+
+      if (orders.length === 0) {
+        ordersContainer.innerHTML = '<tr><td colspan="10" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
+        return;
+      }
+
+      orders.forEach(order => {
+        const name = order.name || "-";
+        const productName = order.productName || "-";
+        const governorate = order.governorate || "-";
+        const phone1 = order.phone1 || "-";
+        const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
+        const address1 = order.address1 || "-";
+        const address2 = order.address2 || "-";
+        const status = order.status || "قيد التنفيذ";
+        const createdAtFormatted = formatTimestamp(order.createdAt);
+
+        ordersContainer.innerHTML += `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 border-b">${name}</td>
+            <td class="p-3 border-b">${productName}</td>
+            <td class="p-3 border-b">${governorate}</td>
+            <td class="p-3 border-b">${phone1}</td>
+            <td class="p-3 border-b">${phone2}</td>
+            <td class="p-3 border-b">${address1}</td>
+            <td class="p-3 border-b">${address2}</td>
+            <td class="p-3 border-b">${createdAtFormatted}</td>
+            <td class="p-3 border-b">${status}</td>
+            <td class="p-3 border-b text-center">
+              <select onchange="toggleStatus('${order.id}', this.value)" class="border rounded px-2 py-1 cursor-pointer">
+                <option value="قيد التنفيذ" ${status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
+                <option value="مكتمل ✅" ${status === 'مكتمل ✅' ? 'selected' : ''}>مكتمل ✅</option>
+                <option value="ملغي" ${status === 'ملغي' ? 'selected' : ''}>ملغي</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function toggleStatus(id, newStatus) {
+      db.collection("orders").doc(id).update({ status: newStatus })
+        .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
+    }
+
+    function filterOrders() {
+      const filterValue = document.getElementById("filter").value;
+      const filtered = filterValue === "all"
+        ? allOrders
+        : allOrders.filter(order => order.status === filterValue);
+      displayOrders(filtered);
+    }
+
+    function uploadLogo(event) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('logo').src = e.target.result;
       };
+      reader.readAsDataURL(event.target.files[0]);
+    }
 
-      try {
-        await addDoc(collection(db, "orders"), data);
-        document.getElementById('confirmationMessage').style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        form.reset();
-      } catch (error) {
-        alert("❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.");
-        console.error("Firestore error:", error);
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        fetchOrders();
+      } else {
+        window.location.href = "login.html";
       }
     });
   </script>
 </body>
 </html>
-
