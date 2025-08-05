@@ -4,10 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تسجيل دخول المشرف</title>
-  <script type="module">
-    // لا تحمل ملفات Firebase هنا في <head>، بل في السكريبت في الأسفل
-  </script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
@@ -18,44 +17,46 @@
 
     <input id="password" type="password" placeholder="كلمة المرور" class="w-full mb-6 p-3 border border-green-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-    <button id="loginBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md font-semibold transition duration-300">
+    <button onclick="login()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md font-semibold transition duration-300">
       تسجيل الدخول
     </button>
 
     <p id="error" class="text-red-600 text-center mt-4 text-sm"></p>
   </div>
 
-  <script type="module">
-    import { firebaseConfig } from './firebaseConfig.js';
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
+      authDomain: "gogo-580c9.firebaseapp.com",
+      projectId: "gogo-580c9",
+      storageBucket: "gogo-580c9.appspot.com",
+      messagingSenderId: "1017270070832",
+      appId: "1:1017270070832:web:802137b9719a1c525747f5",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    const loginBtn = document.getElementById("loginBtn");
-    const errorMsg = document.getElementById("error");
-
-    loginBtn.addEventListener("click", () => {
-      errorMsg.textContent = "";
-
+    function login() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
+      const errorMsg = document.getElementById("error");
+      errorMsg.textContent = "";
 
       if (!email || !password) {
         errorMsg.textContent = "يرجى ملء جميع الحقول.";
         return;
       }
 
-      signInWithEmailAndPassword(auth, email, password)
+      auth.signInWithEmailAndPassword(email, password)
         .then(() => {
           window.location.href = "dashboard.html";
         })
         .catch(() => {
           errorMsg.textContent = "فشل تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور.";
         });
-    });
+    }
   </script>
 
 </body>
 </html>
+
