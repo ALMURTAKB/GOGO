@@ -1,127 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>لوحة تحكم الطلبات</title>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم - GoGo</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      direction: rtl;
-      background: #f0f0f0;
-    }
-    h1 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #fff;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    th {
-      background-color: #333;
-      color: #fff;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    button {
-      padding: 6px 12px;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-      background-color: #28a745;
-      color: #fff;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f2f2f2; }
+    h1 { text-align: center; }
+    #statusFilter { margin: 20px auto; display: block; }
+    .order { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .order.completed { background-color: #e0ffe0; }
+    .btn-complete { margin-top: 10px; padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-complete:hover { background: #218838; }
   </style>
 </head>
 <body>
-  <h1>لوحة تحكم الطلبات</h1>
-  <table id="orders-table">
-    <thead>
-      <tr>
-        <th>الاسم</th>
-        <th>رقم الهاتف</th>
-        <th>المحافظة</th>
-        <th>العنوان 1</th>
-        <th>العنوان 2</th>
-        <th>معلم قريب</th>
-        <th>الحالة</th>
-        <th>تحديث</th>
-      </tr>
-    </thead>
-    <tbody id="orders-body"></tbody>
-  </table>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js"></script>
+  <h1>لوحة التحكم - GoGo</h1>
+  <select id="statusFilter">
+    <option value="all">عرض الكل</option>
+    <option value="مكتمل ✅">مكتمل</option>
+    <option value="قيد التنفيذ">قيد التنفيذ</option>
+  </select>
+  <div id="orders"></div>
 
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
       authDomain: "gogo-580c9.firebaseapp.com",
       projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.firebasestorage.app",
+      storageBucket: "gogo-580c9.appspot.com",
       messagingSenderId: "1017270070832",
       appId: "1:1017270070832:web:802137b9719a1c525747f5",
       measurementId: "G-YRNMSSYD1W"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    async function loadOrders() {
-      const tbody = document.getElementById("orders-body");
-      tbody.innerHTML = "";
+    const ordersContainer = document.getElementById("orders");
+    const filterSelect = document.getElementById("statusFilter");
 
-      try {
-        const snapshot = await db.collection("orders").get();
-        snapshot.forEach((doc) => {
-          const order = doc.data();
-          const row = document.createElement("tr");
+    function loadOrders(filterValue = "all") {
+      ordersContainer.innerHTML = "جارٍ التحميل...";
+      db.collection("orders").orderBy("createdAt", "desc").get()
+        .then((querySnapshot) => {
+          ordersContainer.innerHTML = "";
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const orderDiv = document.createElement("div");
+            orderDiv.className = "order";
+            if (data.status === "مكتمل ✅") {
+              orderDiv.classList.add("completed");
+            }
 
-          row.innerHTML = `
-            <td>${order.name || ""}</td>
-            <td>${order.phone1 || ""}</td>
-            <td>${order.governorate || ""}</td>
-            <td>${order.address1 || ""}</td>
-            <td>${order.address2 || ""}</td>
-            <td>${order.landmark || ""}</td>
-            <td>${order.status || "جديد"}</td>
-            <td>
-              <button onclick="updateStatus('${doc.id}')">تم التسليم</button>
-            </td>
-          `;
+            if (filterValue !== "all" && data.status !== filterValue) {
+              return;
+            }
 
-          tbody.appendChild(row);
+            orderDiv.innerHTML = `
+              <strong>الاسم:</strong> ${data.name}<br>
+              <strong>المحافظة:</strong> ${data.governorate}<br>
+              <strong>هاتف 1:</strong> ${data.phone1}<br>
+              <strong>هاتف 2:</strong> ${data.phone2 || "-"}<br>
+              <strong>عنوان 1:</strong> ${data.address1}<br>
+              <strong>عنوان 2:</strong> ${data.address2}<br>
+              <strong>ملاحظات:</strong> ${data.landmark}<br>
+              <strong>الحالة:</strong> ${data.status || "قيد التنفيذ"}<br>
+              <button class="btn-complete">تحويل إلى مكتمل</button>
+            `;
+
+            const btn = orderDiv.querySelector(".btn-complete");
+            btn.addEventListener("click", () => {
+              db.collection("orders").doc(doc.id).update({ status: "مكتمل ✅" })
+                .then(() => loadOrders(filterSelect.value));
+            });
+
+            ordersContainer.appendChild(orderDiv);
+          });
+        })
+        .catch((error) => {
+          ordersContainer.innerHTML = "حدث خطأ أثناء تحميل الطلبات.";
+          console.error("Error fetching orders:", error);
         });
-      } catch (error) {
-        alert("حدث خطأ أثناء تحميل الطلبات.");
-        console.error("Error loading orders:", error);
-      }
     }
 
-    async function updateStatus(orderId) {
-      try {
-        await db.collection("orders").doc(orderId).update({
-          status: "تم التسليم",
-        });
-        alert("تم تحديث حالة الطلب.");
-        loadOrders(); // إعادة تحميل القائمة
-      } catch (error) {
-        alert("فشل تحديث الحالة.");
-        console.error("Error updating order:", error);
-      }
-    }
-
-    window.onload = loadOrders;
+    filterSelect.addEventListener("change", () => loadOrders(filterSelect.value));
+    loadOrders();
   </script>
 </body>
 </html>
