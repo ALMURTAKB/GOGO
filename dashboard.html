@@ -2,29 +2,32 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>لوحة تحكم الطلبات</title>
+  
+  <!-- مكتبات Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-  <!-- Header -->
+  <!-- الهيدر -->
   <header class="bg-blue-600 text-white flex justify-between items-center px-6 py-4 shadow">
     <div class="flex items-center gap-4">
       <input type="file" id="logoUploader" class="hidden" onchange="uploadLogo(event)" />
-      <img id="logo" src="https://via.placeholder.com/50" alt="Logo" class="h-10 w-10 rounded-full cursor-pointer" onclick="document.getElementById('logoUploader').click()">
+      <img id="logo" src="https://via.placeholder.com/50" alt="Logo" class="h-10 w-10 rounded-full cursor-pointer" onclick="document.getElementById('logoUploader').click()" />
       <h1 class="text-2xl font-bold">لوحة تحكم الطلبات</h1>
     </div>
     <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition">تسجيل الخروج</button>
   </header>
 
-  <!-- Main -->
+  <!-- المحتوى الرئيسي -->
   <div class="flex flex-1">
 
-    <!-- Sidebar Filter -->
+    <!-- الشريط الجانبي -->
     <aside class="w-64 bg-white p-4 shadow">
       <h2 class="text-xl font-semibold mb-4">تصفية الطلبات</h2>
       <select id="filter" onchange="filterOrders()" class="w-full p-2 border border-gray-300 rounded">
@@ -35,7 +38,7 @@
       </select>
     </aside>
 
-    <!-- Orders Table -->
+    <!-- جدول الطلبات -->
     <main class="flex-1 p-6 overflow-auto">
       <table class="w-full table-auto border-collapse bg-white rounded-lg overflow-hidden shadow">
         <thead class="bg-blue-100 text-blue-900">
@@ -59,32 +62,26 @@
     </main>
   </div>
 
-  <!-- Footer -->
+  <!-- الفوتر -->
   <footer class="text-center text-sm text-gray-600 mt-6 mb-2">
     تم برمجته من قبل <span class="font-semibold text-blue-700">المرتقب</span> باستخدام الذكاء الاصطناعي.
   </footer>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
-      authDomain: "gogo-580c9.firebaseapp.com",
-      projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.appspot.com",
-      messagingSenderId: "1017270070832",
-      appId: "1:1017270070832:web:802137b9719a1c525747f5",
-    };
+  <!-- استدعاء ملف تكوين Firebase -->
+  <script src="./firebaseConfig.js"></script>
 
+  <script>
+    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
     function logout() {
       auth.signOut().then(() => {
-        window.location.href = "login.html";  // صفحة تسجيل الدخول
+        window.location.href = "login.html";
       });
     }
 
-    // دالة لتنسيق التاريخ والوقت بشكل عربي مقروء
     function formatTimestamp(timestamp) {
       if (!timestamp) return "-";
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -131,7 +128,7 @@
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
             <td class="p-3 border-b">${name}</td>
-            <td class="p-3 border-b">${name}</td>
+            <td class="p-3 border-b">${productName}</td>
             <td class="p-3 border-b">${governorate}</td>
             <td class="p-3 border-b">${phone1}</td>
             <td class="p-3 border-b">${phone2}</td>
@@ -182,4 +179,3 @@
   </script>
 </body>
 </html>
-
