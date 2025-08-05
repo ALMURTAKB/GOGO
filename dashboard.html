@@ -49,24 +49,30 @@
       appId: "1:1017270070832:web:802137b9719a1c525747f5"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
+    // Check authentication state
     auth.onAuthStateChanged(user => {
       if (!user) {
-        window.location.href = "index.html"; // إعادة توجيه إلى صفحة تسجيل الدخول
+        window.location.href = "index.html"; // Redirect to login page
       } else {
         loadOrders();
       }
     });
 
+    // Logout function
     function logout() {
       auth.signOut().then(() => {
-        window.location.href = "index.html"; // إعادة توجيه إلى صفحة تسجيل الدخول
+        window.location.href = "index.html"; // Redirect to login page
+      }).catch(error => {
+        console.error("Error signing out: ", error);
       });
     }
 
+    // Load orders from Firestore
     function loadOrders() {
       db.collection("orders").onSnapshot(snapshot => {
         const ordersDiv = document.getElementById("orders");
@@ -80,9 +86,12 @@
           orderCard.innerHTML = `
             <h2 class="text-lg font-bold text-blue-600 mb-2">${data.productName || "اسم المنتج غير متوفر"}</h2>
             <p class="text-sm text-gray-700 mb-1"><strong>الاسم:</strong> ${data.name || "غير متوفر"}</p>
-            <p class="text-sm text-gray-700 mb-1"><strong>الهاتف 1:</strong> ${data.phone || "-"}</p>
+            <p class="text-sm text-gray-700 mb-1"><strong>الهاتف 1:</strong> ${data.phone1 || "-"}</p>
             <p class="text-sm text-gray-700 mb-1"><strong>الهاتف 2:</strong> ${data.phone2 || "-"}</p>
-            <p class="text-sm text-gray-700 mb-1"><strong>العنوان:</strong> ${data.address || "غير متوفر"}</p>
+            <p class="text-sm text-gray-700 mb-1"><strong>العنوان 1:</strong> ${data.address1 || "غير متوفر"}</p>
+            <p class="text-sm text-gray-700 mb-1"><strong>العنوان 2:</strong> ${data.address2 || "غير متوفر"}</p>
+            <p class="text-sm text-gray-700 mb-1"><strong>المحافظة:</strong> ${data.governorate || "غير متوفر"}</p>
+            <p class="text-sm text-gray-700 mb-1"><strong>معلم:</strong> ${data.landmark || "غير متوفر"}</p>
             <p class="text-sm text-gray-700 mb-1"><strong>الكمية:</strong> ${data.quantity || 1}</p>
             <p class="text-sm text-gray-700 mb-1"><strong>الحالة:</strong> <span class="font-semibold">${data.status || "قيد المعالجة"}</span></p>
             <button onclick="updateStatus('${doc.id}', 'تم التوصيل')" class="mt-3 bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">تم التوصيل</button>
@@ -92,13 +101,23 @@
           `;
           ordersDiv.appendChild(orderCard);
         });
+      }, error => {
+        console.error("Error loading orders: ", error);
       });
     }
 
+    // Update order status
     function updateStatus(id, newStatus) {
-      db.collection("orders").doc(id).update({ status: newStatus });
+      db.collection("orders").doc(id).update({ status: newStatus })
+        .then(() => {
+          console.log("Status updated successfully");
+        })
+        .catch(error => {
+          console.error("Error updating status: ", error);
+        });
     }
 
+    // Filter orders based on status
     function filterOrders() {
       const filter = document.getElementById("statusFilter").value;
       const cards = document.querySelectorAll("#orders > div");
