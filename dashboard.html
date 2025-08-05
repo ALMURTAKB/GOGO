@@ -40,6 +40,7 @@
       <table class="w-full table-auto border-collapse bg-white rounded-lg overflow-hidden shadow">
         <thead class="bg-blue-100 text-blue-900">
           <tr>
+            <th class="p-3 text-right border-b">اسم العميل</th>
             <th class="p-3 text-right border-b">المنتج</th>
             <th class="p-3 text-right border-b">هاتف 1</th>
             <th class="p-3 text-right border-b">هاتف 2</th>
@@ -111,11 +112,12 @@
       ordersContainer.innerHTML = "";
 
       if (orders.length === 0) {
-        ordersContainer.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
+        ordersContainer.innerHTML = '<tr><td colspan="9" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
         return;
       }
 
       orders.forEach(order => {
+        const clientName = order.clientName || "-";
         const productName = order.productName || "-";
         const phone1 = order.phone1 || "-";
         const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
@@ -126,6 +128,7 @@
 
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
+            <td class="p-3 border-b">${clientName}</td>
             <td class="p-3 border-b">${productName}</td>
             <td class="p-3 border-b">${phone1}</td>
             <td class="p-3 border-b">${phone2}</td>
