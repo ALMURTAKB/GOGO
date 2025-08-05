@@ -1,73 +1,325 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>طلب المنتج</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #d7e1ec);
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 15px;
+      color: #e0f7e9;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 25px 20px;
+    }
+
+    img.main-img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    img.main-img:hover {
+      transform: scale(1.03);
+    }
+
+    .image-gallery {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0 25px 0;
+      flex-wrap: wrap;
+    }
+
+    .image-gallery img {
+      width: 140px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .image-gallery img:hover {
+      transform: scale(1.1);
+      border-color: #4caf50;
+    }
+
+    h2 {
+      font-size: 24px;
+      margin: 10px 0;
+      color: #333;
+      text-align: center;
+    }
+
+    .price {
+      font-size: 20px;
+      color: #e91e63;
+      margin-bottom: 5px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: line-through;
+    }
+
+    .discount-price {
+      font-size: 22px;
+      color: #4CAF50;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .car-specs {
+      list-style: none;
+      padding: 15px;
+      margin: 0 0 25px 0;
+      font-size: 16px;
+      color: #444;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .car-specs li {
+      margin-bottom: 8px;
+    }
+
+    form {
+      text-align: right;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #444;
+      font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-top: 6px;
+      font-size: 15px;
+      background-color: #f9f9f9;
+      box-sizing: border-box;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: 0.3s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #4caf50;
+      background-color: #fff;
+      outline: none;
+      box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+    }
+
+    button {
+      margin-top: 22px;
+      width: 100%;
+      padding: 14px;
+      background-color: #4caf50;
+      color: white;
+      font-size: 17px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #43a047;
+    }
+
+    .confirmation {
+      display: none;
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 128, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-  <h2>طلب شراء سيارة</h2>
+  <header>
+    <h1>مرحبا بك في GOGO!</h1>
+    <p>منتجات أصلية – توصيل سريع – خدمة موثوقة</p>
+  </header>
 
-  <form id="orderForm">
-    <input type="text" name="name" placeholder="الاسم الكامل" required />
-    <input type="text" name="governorate" placeholder="المحافظة" required />
-    <input type="text" name="address1" placeholder="العنوان الأول" required />
-    <input type="text" name="address2" placeholder="العنوان الثاني" />
-    <input type="text" name="landmark" placeholder="علامة قريبة" />
-    <input type="tel" name="phone1" placeholder="رقم الهاتف الأساسي" required />
-    <input type="tel" name="phone2" placeholder="رقم هاتف إضافي" />
-    <button type="submit">إرسال الطلب</button>
-  </form>
+  <div class="container">
+    <img
+      src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+      alt="صورة سيارة كيا موديل 2017"
+      class="main-img"
+      id="mainImage"
+    />
+    <div class="image-gallery">
+      <img
+        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+        alt="صورة جانبية"
+        onclick="changeMainImage(this.src)"
+      />
+      <img
+        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+        alt="صورة أمامية"
+        onclick="changeMainImage(this.src)"
+      />
+      <img
+        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+        alt="صورة داخلية"
+        onclick="changeMainImage(this.src)"
+      />
+    </div>
 
-  <p id="status"></p>
+    <h2>سيارة نوع كيا موديل 2017</h2>
 
-  <!-- Firebase App -->
+    <ul class="car-specs">
+      <li><strong>اللون:</strong> فضي</li>
+      <li><strong>عدد الكيلومترات:</strong> 120,000 كم</li>
+      <li><strong>ناقل الحركة:</strong> أوتوماتيك</li>
+      <li><strong>الحالة:</strong> بحالة ممتازة</li>
+      <li><strong>الوقود:</strong> بنزين</li>
+      <li><strong>الدفع:</strong> أمامي</li>
+    </ul>
+
+    <div class="discount-price">بعد الخصم: 4,000,000 دينار عراقي فقط!</div>
+    <div class="price">السعر الأصلي: 4,550,000 دينار عراقي</div>
+
+    <form id="orderForm">
+      <label for="name">الاسم الكامل</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="governorate">المحافظة</label>
+      <select id="governorate" name="governorate" required>
+        <option value="">اختر المحافظة</option>
+        <option value="بغداد">بغداد</option>
+        <option value="البصرة">البصرة</option>
+        <option value="نينوى">نينوى</option>
+        <option value="كربلاء">كربلاء</option>
+        <option value="النجف">النجف</option>
+        <option value="ذي قار">ذي قار</option>
+        <option value="بابل">بابل</option>
+        <option value="الأنبار">الأنبار</option>
+        <option value="كركوك">كركوك</option>
+        <option value="أربيل">أربيل</option>
+        <option value="السليمانية">السليمانية</option>
+        <option value="ديالى">ديالى</option>
+        <option value="واسط">واسط</option>
+        <option value="القادسية">القادسية</option>
+        <option value="ميسان">ميسان</option>
+        <option value="المثنى">المثنى</option>
+        <option value="صلاح الدين">صلاح الدين</option>
+        <option value="دهوك">دهوك</option>
+      </select>
+
+      <label for="address1">العنوان الأول</label>
+      <input type="text" id="address1" name="address1" required />
+
+      <label for="address2">العنوان الثاني (اختياري)</label>
+      <input type="text" id="address2" name="address2" />
+
+      <label for="landmark">أقرب نقطة دالة</label>
+      <input type="text" id="landmark" name="landmark" required />
+
+      <label for="phone1">رقم الهاتف الأساسي</label>
+      <input type="tel" id="phone1" name="phone1" required />
+
+      <label for="phone2">رقم الهاتف الثانوي (اختياري)</label>
+      <input type="tel" id="phone2" name="phone2" />
+
+      <button type="submit">إرسال الطلب</button>
+    </form>
+
+    <div id="confirmationMessage" class="confirmation">
+      ✅ تم استلام طلبك بنجاح! سنقوم بالتواصل معك قريبًا.
+    </div>
+  </div>
+
   <script type="module">
-    // Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
       authDomain: "gogo-580c9.firebaseapp.com",
       projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.appspot.com",
+      storageBucket: "gogo-580c9.firebasestorage.app",
       messagingSenderId: "1017270070832",
       appId: "1:1017270070832:web:802137b9719a1c525747f5",
       measurementId: "G-YRNMSSYD1W"
     };
 
-    // Initialize Firebase and Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Form submission
-    const form = document.getElementById("orderForm");
-    const status = document.getElementById("status");
+    function changeMainImage(src) {
+      document.getElementById('mainImage').src = src;
+    }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    document.getElementById('orderForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const form = this;
 
       const data = {
         name: form.name.value.trim(),
-        governorate: form.governorate.value.trim(),
+        governorate: form.governorate.value,
         address1: form.address1.value.trim(),
         address2: form.address2.value.trim(),
         landmark: form.landmark.value.trim(),
         phone1: form.phone1.value.trim(),
         phone2: form.phone2.value.trim(),
-        productName: "سيارة نوع كيا موديل 2017",
         createdAt: new Date()
       };
 
       try {
         await addDoc(collection(db, "orders"), data);
-        status.textContent = "✅ تم إرسال الطلب بنجاح!";
+        document.getElementById('confirmationMessage').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         form.reset();
       } catch (error) {
-        console.error("Error adding document: ", error);
-        status.textContent = "❌ حدث خطأ أثناء الإرسال، حاول مجددًا.";
+        alert("❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.");
+        console.error("Firestore error:", error);
       }
     });
   </script>
