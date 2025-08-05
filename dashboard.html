@@ -31,6 +31,7 @@
         <option value="all">الكل</option>
         <option value="قيد التنفيذ">قيد التنفيذ</option>
         <option value="ملغي">ملغي</option>
+        <option value="مكتمل ✅">مكتمل</option>
       </select>
     </aside>
 
@@ -40,10 +41,12 @@
         <thead class="bg-blue-100 text-blue-900">
           <tr>
             <th class="p-3 text-right border-b">المنتج</th>
+            <th class="p-3 text-right border-b">هاتف 1</th>
+            <th class="p-3 text-right border-b">هاتف 2</th>
             <th class="p-3 text-right border-b">العنوان ١</th>
             <th class="p-3 text-right border-b">العنوان ٢</th>
-            <th class="p-3 text-right border-b">الهاتف ٢</th>
             <th class="p-3 text-right border-b">الحالة</th>
+            <th class="p-3 text-center border-b">تحديث الحالة</th>
           </tr>
         </thead>
         <tbody id="orders" class="text-gray-800">
@@ -73,13 +76,15 @@
     const auth = firebase.auth();
 
     function logout() {
-      auth.signOut().then(() => window.location.href = "index.html");
+      auth.signOut().then(() => {
+        window.location.href = "login.html";  // صفحة تسجيل الدخول
+      });
     }
 
     let allOrders = [];
 
     function fetchOrders() {
-      db.collection("orders").onSnapshot(snapshot => {
+      db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
         allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         displayOrders(allOrders);
       });
@@ -90,21 +95,44 @@
       ordersContainer.innerHTML = "";
 
       if (orders.length === 0) {
-        ordersContainer.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
+        ordersContainer.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
         return;
       }
 
       orders.forEach(order => {
+        // جهز القيم مع التعامل مع القيم الفارغة
+        const product = order.product || "-";
+        const phone1 = order.phone1 || "-";
+        const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
+        const address1 = order.address1 || "-";
+        const address2 = order.address2 || "-";
+        const status = order.status || "قيد التنفيذ";
+
+        // زر تحديث الحالة (تحويل إلى مكتمل أو إلغاء المكتمل)
+        let btnText = status === "مكتمل ✅" ? "إلغاء المكتمل" : "تحويل إلى مكتمل";
+
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
-            <td class="p-3 border-b">${order.product || "-"}</td>
-            <td class="p-3 border-b">${order.address1 || "-"}</td>
-            <td class="p-3 border-b">${order.address2 || "-"}</td>
-            <td class="p-3 border-b">${order.phone2 || "-"}</td>
-            <td class="p-3 border-b">${order.status || "-"}</td>
+            <td class="p-3 border-b">${product}</td>
+            <td class="p-3 border-b">${phone1}</td>
+            <td class="p-3 border-b">${phone2}</td>
+            <td class="p-3 border-b">${address1}</td>
+            <td class="p-3 border-b">${address2}</td>
+            <td class="p-3 border-b">${status}</td>
+            <td class="p-3 border-b text-center">
+              <button onclick="toggleStatus('${order.id}', '${status}')" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                ${btnText}
+              </button>
+            </td>
           </tr>
         `;
       });
+    }
+
+    function toggleStatus(id, currentStatus) {
+      const newStatus = currentStatus === "مكتمل ✅" ? "قيد التنفيذ" : "مكتمل ✅";
+      db.collection("orders").doc(id).update({ status: newStatus })
+        .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
     }
 
     function filterOrders() {
@@ -127,7 +155,7 @@
       if (user) {
         fetchOrders();
       } else {
-        window.location.href = "index.html";
+        window.location.href = "login.html";
       }
     });
   </script>
