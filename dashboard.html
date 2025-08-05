@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <title>لوحة تحكم الطلبات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: sans-serif; margin: 20px; direction: rtl; }
-    table { width: 100%; border-collapse: collapse; }
+    body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
     th { background-color: #f2f2f2; }
-    select { padding: 5px; border-radius: 5px; }
+    button.logout { margin-top: 10px; background-color: #f44336; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px; }
   </style>
 </head>
 <body>
   <h2>لوحة تحكم الطلبات</h2>
+  <button class="logout" id="logoutBtn">تسجيل خروج</button>
   <table id="ordersTable">
     <thead>
       <tr>
@@ -22,7 +24,6 @@
         <th>الهاتف</th>
         <th>المنتج</th>
         <th>تاريخ الطلب</th>
-        <th>الحالة</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -30,9 +31,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
       authDomain: "gogo-580c9.firebaseapp.com",
@@ -45,52 +46,49 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    // تحميل الطلبات وعرضها
-    const loadOrders = async () => {
+    // تحقق تسجيل الدخول
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        loadOrders();
+      } else {
+        // اذا ما مسجل دخول اعد التوجيه لصفحة الدخول
+        window.location.href = "login.html";
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
+    });
+
+    async function loadOrders() {
       const tableBody = document.querySelector("#ordersTable tbody");
       tableBody.innerHTML = "";
-      const querySnapshot = await getDocs(collection(db, "orders"));
-      querySnapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-        const createdAtFormatted = data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString() : '';
 
-        const row = `
-          <tr>
-            <td>${data.name || ''}</td>
-            <td>${data.governorate || ''}</td>
-            <td>${data.address1 || ''} ${data.address2 || ''}</td>
-            <td>${data.phone1 || ''} ${data.phone2 || ''}</td>
-            <td>${data.productName || ''}</td>
-            <td>${createdAtFormatted}</td>
-            <td>
-              <select onchange="updateStatus('${id}', this.value)">
-                <option value="قيد المعالجة" ${data.status === 'قيد المعالجة' ? 'selected' : ''}>قيد المعالجة</option>
-                <option value="مكتمل" ${data.status === 'مكتمل' ? 'selected' : ''}>مكتمل</option>
-                <option value="ملغي" ${data.status === 'ملغي' ? 'selected' : ''}>ملغي</option>
-              </select>
-            </td>
-          </tr>
-        `;
-        tableBody.innerHTML += row;
-      });
-    };
-
-    // دالة تحديث حالة الطلب
-    window.updateStatus = async (orderId, newStatus) => {
       try {
-        const orderRef = doc(db, "orders", orderId);
-        await updateDoc(orderRef, { status: newStatus });
-        alert("تم تحديث حالة الطلب بنجاح!");
+        const querySnapshot = await getDocs(collection(db, "orders"));
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          const row = `
+            <tr>
+              <td>${data.name || ''}</td>
+              <td>${data.governorate || ''}</td>
+              <td>${data.address1 || ''} ${data.address2 || ''}</td>
+              <td>${data.phone1 || ''} ${data.phone2 || ''}</td>
+              <td>${data.productName || ''}</td>
+              <td>${data.createdAt?.toDate ? data.createdAt.toDate().toLocaleString() : ''}</td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+        });
       } catch (error) {
-        alert("حدث خطأ أثناء التحديث، حاول مرة أخرى.");
+        alert("حدث خطأ أثناء تحميل الطلبات.");
         console.error(error);
       }
-    };
-
-    // تحميل الطلبات عند فتح الصفحة
-    loadOrders();
+    }
   </script>
 </body>
 </html>
