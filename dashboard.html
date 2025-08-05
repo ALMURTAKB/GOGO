@@ -40,6 +40,7 @@
   </footer>
 
   <script>
+    // إعدادات Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
       authDomain: "gogo-580c9.firebaseapp.com",
@@ -49,34 +50,39 @@
       appId: "1:1017270070832:web:802137b9719a1c525747f5"
     };
 
-    // Initialize Firebase
+    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Check authentication state
+    // التحقق من حالة المصادقة
     auth.onAuthStateChanged(user => {
       if (!user) {
-        window.location.href = "index.html"; // Redirect to login page
+        window.location.href = "index.html"; // إعادة التوجيه إلى صفحة تسجيل الدخول
       } else {
         loadOrders();
       }
     });
 
-    // Logout function
+    // وظيفة تسجيل الخروج
     function logout() {
       auth.signOut().then(() => {
-        window.location.href = "index.html"; // Redirect to login page
+        window.location.href = "index.html"; // إعادة التوجيه إلى صفحة تسجيل الدخول
       }).catch(error => {
         console.error("Error signing out: ", error);
       });
     }
 
-    // Load orders from Firestore
+    // تحميل الطلبات من Firestore
     function loadOrders() {
       db.collection("orders").onSnapshot(snapshot => {
         const ordersDiv = document.getElementById("orders");
         ordersDiv.innerHTML = "";
+
+        if (snapshot.empty) {
+          ordersDiv.innerHTML = "<p class='text-gray-500'>لا توجد طلبات لعرضها.</p>";
+          return;
+        }
 
         snapshot.forEach(doc => {
           const data = doc.data();
@@ -106,7 +112,7 @@
       });
     }
 
-    // Update order status
+    // تحديث حالة الطلب
     function updateStatus(id, newStatus) {
       db.collection("orders").doc(id).update({ status: newStatus })
         .then(() => {
@@ -117,7 +123,7 @@
         });
     }
 
-    // Filter orders based on status
+    // تصفية الطلبات بناءً على الحالة
     function filterOrders() {
       const filter = document.getElementById("statusFilter").value;
       const cards = document.querySelectorAll("#orders > div");
