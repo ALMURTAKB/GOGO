@@ -42,7 +42,7 @@
     table {
       border-collapse: collapse;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1150px; /* زدت العرض شوي عشان عمود جديد */
       margin: 0 auto 40px auto;
       background: #ffffff;
       border-radius: 12px;
@@ -60,11 +60,9 @@
       border-right: 1px solid #c6f6d5;
       user-select: text;
       transition: background-color 0.3s ease;
-
-      /* تعديل هنا لضبط الالتفاف وعدم القص */
+      word-break: break-word;
+      max-width: 150px;
       white-space: normal;
-      max-width: 220px;
-      word-wrap: break-word;
     }
     th:last-child, td:last-child {
       border-right: none;
@@ -262,8 +260,8 @@
         <table id="ordersTable">
           <thead>
             <tr>
-              <th>اسم المنتج</th>
               <th>الاسم</th>
+              <th>اسم المنتج</th>
               <th>المحافظة</th>
               <th>هاتف 1</th>
               <th>هاتف 2</th>
@@ -287,13 +285,15 @@
         if (status === "مكتمل ✅") rowClass = "completed";
         else if (status === "ملغي") rowClass = "canceled";
 
+        const phone2 = (order.data.phone2 && order.data.phone2.trim() !== "") ? order.data.phone2 : "-";
+
         tableHTML += `
           <tr class="${rowClass}" data-id="${order.id}">
-            <td data-label="اسم المنتج">${order.data.productName || "-"}</td>
             <td data-label="الاسم">${order.data.name}</td>
+            <td data-label="اسم المنتج">${order.data.productName || "-"}</td>
             <td data-label="المحافظة">${order.data.governorate}</td>
             <td data-label="هاتف 1">${order.data.phone1}</td>
-            <td data-label="هاتف 2">${order.data.phone2 || "-"}</td>
+            <td data-label="هاتف 2">${phone2}</td>
             <td data-label="عنوان 1">${order.data.address1}</td>
             <td data-label="عنوان 2">${order.data.address2 || "-"}</td>
             <td data-label="ملاحظات">${order.data.landmark}</td>
@@ -336,33 +336,4 @@
           const docId = tr.getAttribute("data-id");
           if (!confirm("هل أنت متأكد من إلغاء هذا الطلب؟ لا يمكن التراجع عن هذه العملية.")) return;
 
-          try {
-            await db.collection("orders").doc(docId).update({ status: "ملغي" });
-            loadOrders(filterSelect.value);
-          } catch (error) {
-            alert("خطأ في إلغاء الطلب: " + error.message);
-          }
-        });
-      });
-    }
-
-    async function loadOrders(filter = "all") {
-      ordersContainer.innerHTML = "<p>جارٍ التحميل...</p>";
-      try {
-        const snapshot = await db.collection("orders").orderBy("createdAt", "desc").get();
-        const orders = [];
-        snapshot.forEach(doc => {
-          orders.push({ id: doc.id, data: doc.data() });
-        });
-        renderTable(orders, filter);
-      } catch (error) {
-        ordersContainer.innerHTML = `<p class="no-orders">حدث خطأ أثناء تحميل الطلبات.</p>`;
-        console.error("Error fetching orders:", error);
-      }
-    }
-
-    filterSelect.addEventListener("change", () => loadOrders(filterSelect.value));
-    loadOrders();
-  </script>
-</body>
-</html>
+         
