@@ -100,16 +100,12 @@
       }
 
       orders.forEach(order => {
-        // جهز القيم مع التعامل مع القيم الفارغة
         const productName = order.productName || "-";
         const phone1 = order.phone1 || "-";
         const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
         const address1 = order.address1 || "-";
         const address2 = order.address2 || "-";
         const status = order.status || "قيد التنفيذ";
-
-        // زر تحديث الحالة (تحويل إلى مكتمل أو إلغاء المكتمل)
-        let btnText = status === "مكتمل ✅" ? "إلغاء المكتمل" : "تحويل إلى مكتمل";
 
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
@@ -120,17 +116,18 @@
             <td class="p-3 border-b">${address2}</td>
             <td class="p-3 border-b">${status}</td>
             <td class="p-3 border-b text-center">
-              <button onclick="toggleStatus('${order.id}', '${status}')" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
-                ${btnText}
-              </button>
+              <select onchange="toggleStatus('${order.id}', this.value)" class="border rounded px-2 py-1 cursor-pointer">
+                <option value="قيد التنفيذ" ${status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
+                <option value="مكتمل ✅" ${status === 'مكتمل ✅' ? 'selected' : ''}>مكتمل ✅</option>
+                <option value="ملغي" ${status === 'ملغي' ? 'selected' : ''}>ملغي</option>
+              </select>
             </td>
           </tr>
         `;
       });
     }
 
-    function toggleStatus(id, currentStatus) {
-      const newStatus = currentStatus === "مكتمل ✅" ? "قيد التنفيذ" : "مكتمل ✅";
+    function toggleStatus(id, newStatus) {
       db.collection("orders").doc(id).update({ status: newStatus })
         .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
     }
@@ -161,5 +158,3 @@
   </script>
 </body>
 </html>
-
-
