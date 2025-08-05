@@ -42,6 +42,7 @@
           <tr>
             <th class="p-3 text-right border-b">اسم العميل</th>
             <th class="p-3 text-right border-b">المنتج</th>
+            <th class="p-3 text-right border-b">المحافظة</th>
             <th class="p-3 text-right border-b">هاتف 1</th>
             <th class="p-3 text-right border-b">هاتف 2</th>
             <th class="p-3 text-right border-b">العنوان ١</th>
@@ -112,13 +113,14 @@
       ordersContainer.innerHTML = "";
 
       if (orders.length === 0) {
-        ordersContainer.innerHTML = '<tr><td colspan="9" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
+        ordersContainer.innerHTML = '<tr><td colspan="10" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
         return;
       }
 
       orders.forEach(order => {
         const name = order.name || "-";
         const productName = order.productName || "-";
+        const governorate = order.governorate || "-";
         const phone1 = order.phone1 || "-";
         const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
         const address1 = order.address1 || "-";
@@ -129,7 +131,8 @@
         ordersContainer.innerHTML += `
           <tr class="hover:bg-gray-50">
             <td class="p-3 border-b">${name}</td>
-            <td class="p-3 border-b">${productName}</td>
+            <td class="p-3 border-b">${name}</td>
+            <td class="p-3 border-b">${governorate}</td>
             <td class="p-3 border-b">${phone1}</td>
             <td class="p-3 border-b">${phone2}</td>
             <td class="p-3 border-b">${address1}</td>
@@ -179,4 +182,3 @@
   </script>
 </body>
 </html>
-
