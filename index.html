@@ -167,42 +167,23 @@
 
   <div class="container">
     <img
-      src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-      alt="صورة سيارة كيا موديل 2017"
+      src="https://via.placeholder.com/1200x800?text=جارٍ+تحميل+الصورة..."
+      alt="صورة المنتج"
       class="main-img"
       id="mainImage"
     />
-    <div class="image-gallery">
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة جانبية"
-        onclick="changeMainImage(this.src)"
-      />
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة أمامية"
-        onclick="changeMainImage(this.src)"
-      />
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة داخلية"
-        onclick="changeMainImage(this.src)"
-      />
+    <div class="image-gallery" id="imageGallery">
+      <!-- صور إضافية ممكن تحطها هنا لو موجودة -->
     </div>
 
-    <h2 id="productNameTitle">سيارة نوع كيا موديل 2017</h2>
+    <h2 id="productNameTitle">جارٍ تحميل اسم المنتج...</h2>
 
-    <ul class="car-specs">
-      <li><strong>اللون:</strong> فضي</li>
-      <li><strong>عدد الكيلومترات:</strong> 120,000 كم</li>
-      <li><strong>ناقل الحركة:</strong> أوتوماتيك</li>
-      <li><strong>الحالة:</strong> بحالة ممتازة</li>
-      <li><strong>الوقود:</strong> بنزين</li>
-      <li><strong>الدفع:</strong> أمامي</li>
+    <ul class="car-specs" id="productSpecs" style="display:none;">
+      <!-- مواصفات المنتج إذا تحتاج -->
     </ul>
 
-    <div class="discount-price" id="discountPrice">بعد الخصم: 4,000,000 دينار عراقي فقط!</div>
-    <div class="price" id="originalPrice">السعر الأصلي: 4,550,000 دينار عراقي</div>
+    <div class="discount-price" id="discountPriceText"></div>
+    <div class="price" id="originalPriceText"></div>
 
     <form id="orderForm">
       <label for="name">الاسم الكامل</label>
@@ -251,84 +232,83 @@
     </div>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
-    authDomain: "gogo-580c9.firebaseapp.com",
-    projectId: "gogo-580c9",
-    storageBucket: "gogo-580c9.appspot.com",
-    messagingSenderId: "1017270070832",
-    appId: "1:1017270070832:web:802137b9719a1c525747f5"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // تحميل بيانات المنتج من Firestore
-  async function loadProductData() {
-    const productRef = doc(db, "settings", "product");
-    const productSnap = await getDoc(productRef);
-
-    if (productSnap.exists()) {
-      const product = productSnap.data();
-
-      // تحديث العناصر في الصفحة
-      document.getElementById('productNameTitle').textContent = product.name || "اسم المنتج";
-      document.getElementById('mainImage').src = product.image || "https://via.placeholder.com/1200x800?text=No+Image";
-      // تحديث الأسعار حسب وجودها
-      if(product.discountPrice && product.discountPrice.trim() !== "") {
-        document.querySelector('.discount-price').textContent = `بعد الخصم: ${product.discountPrice} دينار عراقي فقط!`;
-      } else {
-        document.querySelector('.discount-price').textContent = "";
-      }
-      if(product.originalPrice && product.originalPrice.trim() !== "") {
-        document.querySelector('.price').textContent = `السعر الأصلي: ${product.originalPrice} دينار عراقي`;
-      } else {
-        document.querySelector('.price').textContent = "";
-      }
-
-    } else {
-      console.log("مستند المنتج غير موجود في Firestore!");
-    }
-  }
-
-  // نادِ الدالة عند تحميل الصفحة
-  loadProductData();
-
-  function changeMainImage(src) {
-    document.getElementById('mainImage').src = src;
-  }
-
-  // باقي كود الفورم...
-  document.getElementById('orderForm').addEventListener('submit', async function (event) {
-    event.preventDefault();
-
-    const form = this;
-    const productName = document.getElementById('productNameTitle').textContent.trim();
-
-    const data = {
-      name: form.name.value.trim(),
-      governorate: form.governorate.value,
-      address1: form.address1.value.trim(),
-      address2: form.address2 ? form.address2.value.trim() : "",
-      landmark: form.landmark.value.trim(),
-      phone1: form.phone1.value.trim(),
-      phone2: form.phone2.value.trim(),
-      productName: productName,
-      createdAt: new Date()
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
+      authDomain: "gogo-580c9.firebaseapp.com",
+      projectId: "gogo-580c9",
+      storageBucket: "gogo-580c9.appspot.com",
+      messagingSenderId: "1017270070832",
+      appId: "1:1017270070832:web:802137b9719a1c525747f5"
     };
 
-    try {
-      await addDoc(collection(db, "orders"), data);
-      document.getElementById('confirmationMessage').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      form.reset();
-    } catch (error) {
-      alert("❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.");
-      console.error("Firestore error:", error);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadProductData() {
+      const productRef = doc(db, "settings", "product");
+      const productSnap = await getDoc(productRef);
+
+      if (productSnap.exists()) {
+        const product = productSnap.data();
+
+        // تحديث اسم المنتج
+        document.getElementById('productNameTitle').textContent = product.name || "اسم المنتج";
+
+        // تحديث الصورة الرئيسية
+        document.getElementById('mainImage').src = product.image || "https://via.placeholder.com/1200x800?text=لا+يوجد+صورة";
+
+        // تحديث الأسعار
+        document.getElementById('discountPriceText').textContent = product.discountPrice && product.discountPrice.trim() !== "" ?
+          `بعد الخصم: ${product.discountPrice} دينار عراقي فقط!` : "";
+
+        document.getElementById('originalPriceText').textContent = product.originalPrice && product.originalPrice.trim() !== "" ?
+          `السعر الأصلي: ${product.originalPrice} دينار عراقي` : "";
+
+        // لو عندك مواصفات تانية تقدر تحدثها هنا
+
+      } else {
+        console.log("مستند المنتج غير موجود!");
+      }
     }
-  });
-</script>
+
+    loadProductData();
+
+    function changeMainImage(src) {
+      document.getElementById('mainImage').src = src;
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const form = this;
+      const productName = document.getElementById('productNameTitle').textContent.trim();
+
+      const data = {
+        name: form.name.value.trim(),
+        governorate: form.governorate.value,
+        address1: form.address1.value.trim(),
+        address2: form.address2 ? form.address2.value.trim() : "",
+        landmark: form.landmark.value.trim(),
+        phone1: form.phone1.value.trim(),
+        phone2: form.phone2.value.trim(),
+        productName: productName,
+        createdAt: new Date()
+      };
+
+      try {
+        await addDoc(collection(db, "orders"), data);
+        document.getElementById('confirmationMessage').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        form.reset();
+      } catch (error) {
+        alert("❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.");
+        console.error("Firestore error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
