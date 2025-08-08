@@ -5,7 +5,158 @@
   <title>طلب المنتج</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* نفس التنسيقات السابقة */
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #d7e1ec);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 15px;
+      color: #e0f7e9;
+    }
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 25px 20px;
+    }
+    img.main-img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    img.main-img:hover {
+      transform: scale(1.03);
+    }
+    .image-gallery {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0 25px 0;
+      flex-wrap: wrap;
+    }
+    .image-gallery img {
+      width: 140px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .image-gallery img:hover {
+      transform: scale(1.1);
+      border-color: #4caf50;
+    }
+    h2 {
+      font-size: 24px;
+      margin: 10px 0;
+      color: #333;
+      text-align: center;
+    }
+    .price {
+      font-size: 20px;
+      color: #e91e63;
+      margin-bottom: 5px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: line-through;
+    }
+    .discount-price {
+      font-size: 22px;
+      color: #4CAF50;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .car-specs {
+      list-style: none;
+      padding: 15px;
+      margin: 0 0 25px 0;
+      font-size: 16px;
+      color: #444;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+    .car-specs li {
+      margin-bottom: 8px;
+    }
+    form {
+      text-align: right;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #444;
+      font-size: 14px;
+    }
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-top: 6px;
+      font-size: 15px;
+      background-color: #f9f9f9;
+      box-sizing: border-box;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: 0.3s;
+    }
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #4caf50;
+      background-color: #fff;
+      outline: none;
+      box-shadow: 0 0 6px rgba(76, 175, 80, 0.3);
+    }
+    button {
+      margin-top: 22px;
+      width: 100%;
+      padding: 14px;
+      background-color: #4caf50;
+      color: white;
+      font-size: 17px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #43a047;
+    }
+    .confirmation {
+      display: none;
+      background-color: #dff0d8;
+      color: #3c763d;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 128, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -16,24 +167,44 @@
 
   <div class="container">
     <img
-      src=""
-      alt="صورة المنتج"
+      src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+      alt="صورة سيارة كيا موديل 2017"
       class="main-img"
       id="mainImage"
     />
-    <!-- يمكنك إضافة معرض صور إذا تريد -->
+    <div class="image-gallery">
+      <img
+        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+        alt="صورة جانبية"
+        onclick="changeMainImage(this.src)"
+      />
+      <img
+        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+        alt="صورة أمامية"
+        onclick="changeMainImage(this.src)"
+      />
+      <img
+        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
+        alt="صورة داخلية"
+        onclick="changeMainImage(this.src)"
+      />
+    </div>
 
-    <h2 id="productNameTitle">جارٍ تحميل اسم المنتج...</h2>
+    <h2 id="productNameTitle">سيارة نوع كيا موديل 2017</h2>
 
-    <ul class="car-specs" id="productSpecs">
-      <!-- يمكنك إضافة مواصفات منتج هنا عند الحاجة -->
+    <ul class="car-specs">
+      <li><strong>اللون:</strong> فضي</li>
+      <li><strong>عدد الكيلومترات:</strong> 120,000 كم</li>
+      <li><strong>ناقل الحركة:</strong> أوتوماتيك</li>
+      <li><strong>الحالة:</strong> بحالة ممتازة</li>
+      <li><strong>الوقود:</strong> بنزين</li>
+      <li><strong>الدفع:</strong> أمامي</li>
     </ul>
 
-    <div class="discount-price" id="discountPrice"></div>
-    <div class="price" id="originalPrice"></div>
+    <div class="discount-price" id="discountPrice">بعد الخصم: 4,000,000 دينار عراقي فقط!</div>
+    <div class="price" id="originalPrice">السعر الأصلي: 4,550,000 دينار عراقي</div>
 
     <form id="orderForm">
-      <!-- حقول الطلب كما في الكود السابق -->
       <label for="name">الاسم الكامل</label>
       <input type="text" id="name" name="name" required />
 
@@ -75,14 +246,14 @@
       <button type="submit">إرسال الطلب</button>
     </form>
 
-    <div id="confirmationMessage" class="confirmation" style="display:none;">
+    <div id="confirmationMessage" class="confirmation">
       ✅ تم استلام طلبك بنجاح! سنقوم بالتواصل معك قريبًا.
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
@@ -97,19 +268,22 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    function changeMainImage(src) {
+      document.getElementById('mainImage').src = src;
+    }
+
     async function loadProduct() {
       try {
-        const productRef = doc(db, "settings", "product"); // هنا مسار المستند
+        const productRef = doc(db, "settings", "product");
         const productSnap = await getDoc(productRef);
 
         if (productSnap.exists()) {
           const product = productSnap.data();
           document.getElementById('productNameTitle').textContent = product.name || "اسم المنتج غير متوفر";
-          document.getElementById('mainImage').src = product.image || "";
-          document.getElementById('discountPrice').textContent = product.discountPrice || "";
-          document.getElementById('originalPrice').textContent = product.originalPrice || "";
+          document.getElementById('mainImage').src = product.image || "https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg";
+          document.getElementById('discountPrice').textContent = product.discountPrice || "بعد الخصم: 4,000,000 دينار عراقي فقط!";
+          document.getElementById('originalPrice').textContent = product.originalPrice || "السعر الأصلي: 4,550,000 دينار عراقي";
         } else {
-          document.getElementById('productNameTitle').textContent = "المنتج غير موجود";
           console.warn("المستند product غير موجود في settings");
         }
       } catch (error) {
@@ -121,10 +295,10 @@
       loadProduct();
     });
 
-    document.getElementById('orderForm').addEventListener('submit', async (event) => {
+    document.getElementById('orderForm').addEventListener('submit', async function (event) {
       event.preventDefault();
 
-      const form = event.target;
+      const form = this;
       const productName = document.getElementById('productNameTitle').textContent.trim();
 
       const data = {
