@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>طلب المنتج</title>
+  <title>GoGo - متجر </title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -161,7 +161,7 @@
 </head>
 <body>
   <header>
-    <h1>مرحبا بك في GOGO!</h1>
+    <h1> مرحبا بك في GOGO </h1>
     <p>منتجات أصلية – توصيل سريع – خدمة موثوقة</p>
   </header>
 
@@ -212,7 +212,7 @@
         <option value="دهوك">دهوك</option>
       </select>
 
-      <label for="address1">العنوان الأول</label>
+      <label for="address1">العنوان الكامل </label>
       <input type="text" id="address1" name="address1" required />
 
       <label for="landmark">أقرب نقطة دالة</label>
@@ -228,7 +228,7 @@
     </form>
 
     <div id="confirmationMessage" class="confirmation">
-      ✅ تم استلام طلبك بنجاح! سنقوم بالتواصل معك قريبًا.
+      ✅ تم استلام طلبك بنجاح  سنقوم بالتواصل معك قريبًا.
     </div>
   </div>
 
@@ -263,7 +263,7 @@
 
         // تحديث الأسعار
         document.getElementById('discountPriceText').textContent = product.discountPrice && product.discountPrice.trim() !== "" ?
-          `بعد الخصم: ${product.discountPrice} دينار عراقي فقط!` : "";
+          `بعد الخصم: ${product.discountPrice} دينار عراقي فقط ` : "";
 
         document.getElementById('originalPriceText').textContent = product.originalPrice && product.originalPrice.trim() !== "" ?
           `السعر الأصلي: ${product.originalPrice} دينار عراقي` : "";
@@ -312,3 +312,4 @@
   </script>
 </body>
 </html>
+
