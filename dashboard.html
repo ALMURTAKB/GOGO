@@ -70,6 +70,7 @@
             <th class="p-3 text-right border-b">تاريخ ووقت الطلب</th>
             <th class="p-3 text-right border-b">الحالة</th>
             <th class="p-3 text-center border-b">تحديث الحالة</th>
+            <th class="p-3 text-center border-b">حذف</th>
           </tr>
         </thead>
         <tbody id="orders" class="text-gray-800">
@@ -132,7 +133,7 @@
       ordersContainer.innerHTML = "";
 
       if (orders.length === 0) {
-        ordersContainer.innerHTML = '<tr><td colspan="10" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
+        ordersContainer.innerHTML = '<tr><td colspan="11" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
         return;
       }
 
@@ -165,6 +166,9 @@
                 <option value="ملغي" ${status === 'ملغي' ? 'selected' : ''}>ملغي</option>
               </select>
             </td>
+            <td class="p-3 border-b text-center">
+              <button onclick="deleteOrder('${order.id}')" class="text-red-600 hover:text-red-800">🗑 حذف</button>
+            </td>
           </tr>
         `;
       });
@@ -173,6 +177,14 @@
     function toggleStatus(id, newStatus) {
       db.collection("orders").doc(id).update({ status: newStatus })
         .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
+    }
+
+    function deleteOrder(id) {
+      if (confirm("هل أنت متأكد من حذف هذا الطلب؟")) {
+        db.collection("orders").doc(id).delete()
+          .then(() => alert("تم حذف الطلب بنجاح"))
+          .catch(err => alert("خطأ في حذف الطلب: " + err.message));
+      }
     }
 
     function filterOrders() {
@@ -239,4 +251,3 @@
   </script>
 </body>
 </html>
-
