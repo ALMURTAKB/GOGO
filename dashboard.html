@@ -38,6 +38,21 @@
         <option value="ملغي">ملغي</option>
         <option value="مكتمل ✅">مكتمل</option>
       </select>
+
+      <h2 class="text-xl font-semibold mt-6 mb-2">بيانات المنتج</h2>
+      <label class="text-sm">اسم المنتج</label>
+      <input id="productName" class="w-full p-2 border rounded mb-2" placeholder="مثلاً: كيا 2017" />
+
+      <label class="text-sm">رابط صورة المنتج</label>
+      <input id="productImage" class="w-full p-2 border rounded mb-2" placeholder="https://..." />
+
+      <label class="text-sm">السعر الأصلي</label>
+      <input id="originalPrice" type="number" class="w-full p-2 border rounded mb-2" placeholder="مثلاً: 4550000" />
+
+      <label class="text-sm">السعر بعد الخصم</label>
+      <input id="discountPrice" type="number" class="w-full p-2 border rounded mb-2" placeholder="مثلاً: 4000000" />
+
+      <button onclick="saveProductData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">💾 حفظ المنتج</button>
     </aside>
 
     <!-- Orders Table -->
@@ -194,6 +209,25 @@
       });
       displayOrders(filtered);
     });
+
+    function saveProductData() {
+      const name = document.getElementById("productName").value;
+      const image = document.getElementById("productImage").value;
+      const originalPrice = document.getElementById("originalPrice").value;
+      const discountPrice = document.getElementById("discountPrice").value;
+
+      const productData = {
+        name,
+        image,
+        originalPrice,
+        discountPrice,
+        updatedAt: new Date()
+      };
+
+      db.collection("settings").doc("product").set(productData)
+        .then(() => alert("✅ تم تحديث بيانات المنتج بنجاح"))
+        .catch(error => alert("❌ فشل في التحديث: " + error.message));
+    }
 
     auth.onAuthStateChanged(user => {
       if (user) {
