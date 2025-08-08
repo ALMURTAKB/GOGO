@@ -172,13 +172,13 @@
       class="main-img"
       id="mainImage"
     />
-    <div class="image-gallery" id="gallery">
+    <div class="image-gallery" id="gallery" style="display:none;">
       <!-- صور المعرض تظهر هنا -->
     </div>
 
     <h2 id="productNameTitle">تحميل المنتج...</h2>
 
-    <ul class="car-specs" id="specsList">
+    <ul class="car-specs" id="specsList" style="display:none;">
       <!-- مواصفات المنتج تظهر هنا -->
     </ul>
 
@@ -250,19 +250,20 @@
     const db = getFirestore(app);
 
     async function loadProduct() {
-      const productRef = doc(db, "products", "settings"); // تم تغيير هنا
+      const productRef = doc(db, "products", "settings");
       const productSnap = await getDoc(productRef);
 
       if (productSnap.exists()) {
         const product = productSnap.data();
 
         document.getElementById('productNameTitle').textContent = product.name || "اسم المنتج غير متوفر";
-        document.getElementById('mainImage').src = product.mainImage || "";
+        document.getElementById('mainImage').src = product.image || "";
 
-        // تحديث معرض الصور
-        const galleryDiv = document.getElementById('gallery');
-        galleryDiv.innerHTML = "";
-        if (Array.isArray(product.gallery)) {
+        // إخفاء معرض الصور والمواصفات إذا غير موجودة
+        if (product.gallery && Array.isArray(product.gallery) && product.gallery.length > 0) {
+          const galleryDiv = document.getElementById('gallery');
+          galleryDiv.style.display = "flex";
+          galleryDiv.innerHTML = "";
           product.gallery.forEach(src => {
             const img = document.createElement('img');
             img.src = src;
@@ -276,23 +277,32 @@
             };
             galleryDiv.appendChild(img);
           });
+        } else {
+          document.getElementById('gallery').style.display = "none";
         }
 
-        document.getElementById('originalPrice').textContent = product.price ? `السعر الأصلي: ${product.price.toLocaleString()} دينار عراقي` : "";
-        document.getElementById('discountPrice').textContent = product.discountPrice ? `بعد الخصم: ${product.discountPrice.toLocaleString()} دينار عراقي فقط!` : "";
+        document.getElementById('discountPrice').textContent = product.discountPrice || "";
+        document.getElementById('originalPrice').textContent = product.originalPrice || "";
 
-        // تحديث المواصفات
-        const specsList = document.getElementById('specsList');
-        specsList.innerHTML = "";
-        if (Array.isArray(product.specs)) {
+        if (product.specs && Array.isArray(product.specs) && product.specs.length > 0) {
+          const specsList = document.getElementById('specsList');
+          specsList.style.display = "block";
+          specsList.innerHTML = "";
           product.specs.forEach(spec => {
             const li = document.createElement('li');
             li.innerHTML = `<strong>${spec.label}:</strong> ${spec.value}`;
             specsList.appendChild(li);
           });
+        } else {
+          document.getElementById('specsList').style.display = "none";
         }
       } else {
         document.getElementById('productNameTitle').textContent = "المنتج غير موجود";
+        document.getElementById('mainImage').src = "";
+        document.getElementById('discountPrice').textContent = "";
+        document.getElementById('originalPrice').textContent = "";
+        document.getElementById('gallery').style.display = "none";
+        document.getElementById('specsList').style.display = "none";
         console.warn("المنتج غير موجود في Firestore");
       }
     }
