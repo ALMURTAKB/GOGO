@@ -1,185 +1,105 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم الطلبات</title>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="firebaseConfig.js"></script>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .controls {
+      margin: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body>
+  <h1>طلبات العملاء</h1>
 
-  <!-- Header -->
-  <header class="bg-blue-600 text-white flex justify-between items-center px-6 py-4 shadow">
-    <div class="flex items-center gap-4">
-      <input type="file" id="logoUploader" class="hidden" onchange="uploadLogo(event)" />
-      <img id="logo" src="https://via.placeholder.com/50" alt="Logo" class="h-10 w-10 rounded-full cursor-pointer" onclick="document.getElementById('logoUploader').click()">
-      <h1 class="text-2xl font-bold">لوحة تحكم الطلبات</h1>
-    </div>
-    <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition">تسجيل الخروج</button>
-  </header>
-
-  <!-- Main -->
-  <div class="flex flex-1">
-
-    <!-- Sidebar Filter -->
-    <aside class="w-64 bg-white p-4 shadow">
-      <h2 class="text-xl font-semibold mb-4">تصفية الطلبات</h2>
-      <select id="filter" onchange="filterOrders()" class="w-full p-2 border border-gray-300 rounded">
-        <option value="all">الكل</option>
-        <option value="قيد التنفيذ">قيد التنفيذ</option>
-        <option value="ملغي">ملغي</option>
-        <option value="مكتمل ✅">مكتمل</option>
-      </select>
-    </aside>
-
-    <!-- Orders Table -->
-    <main class="flex-1 p-6 overflow-auto">
-      <table class="w-full table-auto border-collapse bg-white rounded-lg overflow-hidden shadow">
-        <thead class="bg-blue-100 text-blue-900">
-          <tr>
-            <th class="p-3 text-right border-b">اسم العميل</th>
-            <th class="p-3 text-right border-b">المنتج</th>
-            <th class="p-3 text-right border-b">المحافظة</th>
-            <th class="p-3 text-right border-b">هاتف 1</th>
-            <th class="p-3 text-right border-b">هاتف 2</th>
-            <th class="p-3 text-right border-b">العنوان ١</th>
-            <th class="p-3 text-right border-b">العنوان ٢</th>
-            <th class="p-3 text-right border-b">تاريخ ووقت الطلب</th>
-            <th class="p-3 text-right border-b">الحالة</th>
-            <th class="p-3 text-center border-b">تحديث الحالة</th>
-          </tr>
-        </thead>
-        <tbody id="orders" class="text-gray-800">
-          <!-- الطلبات تظهر هنا -->
-        </tbody>
-      </table>
-    </main>
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="ابحث عن اسم أو رقم الهاتف">
+    <button onclick="exportToExcel()">📤 استخراج إلى Excel</button>
   </div>
 
-  <!-- Footer -->
-  <footer class="text-center text-sm text-gray-600 mt-6 mb-2">
-    تم برمجته من قبل <span class="font-semibold text-blue-700">المرتقب</span> باستخدام الذكاء الاصطناعي.
-  </footer>
+  <table>
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>رقم الهاتف</th>
+        <th>المحافظة</th>
+        <th>المنتج</th>
+        <th>الكمية</th>
+        <th>العنوان</th>
+        <th>تاريخ الطلب</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody id="ordersTableBody"></tbody>
+  </table>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
-      authDomain: "gogo-580c9.firebaseapp.com",
-      projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.appspot.com",
-      messagingSenderId: "1017270070832",
-      appId: "1:1017270070832:web:802137b9719a1c525747f5",
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    function logout() {
-      auth.signOut().then(() => {
-        window.location.href = "login.html";  // صفحة تسجيل الدخول
-      });
-    }
-
-    // دالة لتنسيق التاريخ والوقت بشكل عربي مقروء
-    function formatTimestamp(timestamp) {
-      if (!timestamp) return "-";
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-      return date.toLocaleString("ar-EG", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
-    }
-
-    let allOrders = [];
-
-    function fetchOrders() {
-      db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        displayOrders(allOrders);
-      });
-    }
-
-    function displayOrders(orders) {
-      const ordersContainer = document.getElementById("orders");
-      ordersContainer.innerHTML = "";
-
-      if (orders.length === 0) {
-        ordersContainer.innerHTML = '<tr><td colspan="10" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
-        return;
-      }
-
-      orders.forEach(order => {
-        const name = order.name || "-";
-        const productName = order.productName || "-";
-        const governorate = order.governorate || "-";
-        const phone1 = order.phone1 || "-";
-        const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
-        const address1 = order.address1 || "-";
-        const address2 = order.address2 || "-";
-        const status = order.status || "قيد التنفيذ";
-        const createdAtFormatted = formatTimestamp(order.createdAt);
-
-        ordersContainer.innerHTML += `
-          <tr class="hover:bg-gray-50">
-            <td class="p-3 border-b">${name}</td>
-            <td class="p-3 border-b">${name}</td>
-            <td class="p-3 border-b">${governorate}</td>
-            <td class="p-3 border-b">${phone1}</td>
-            <td class="p-3 border-b">${phone2}</td>
-            <td class="p-3 border-b">${address1}</td>
-            <td class="p-3 border-b">${address2}</td>
-            <td class="p-3 border-b">${createdAtFormatted}</td>
-            <td class="p-3 border-b">${status}</td>
-            <td class="p-3 border-b text-center">
-              <select onchange="toggleStatus('${order.id}', this.value)" class="border rounded px-2 py-1 cursor-pointer">
-                <option value="قيد التنفيذ" ${status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
-                <option value="مكتمل ✅" ${status === 'مكتمل ✅' ? 'selected' : ''}>مكتمل ✅</option>
-                <option value="ملغي" ${status === 'ملغي' ? 'selected' : ''}>ملغي</option>
-              </select>
-            </td>
-          </tr>
-        `;
-      });
-    }
-
-    function toggleStatus(id, newStatus) {
-      db.collection("orders").doc(id).update({ status: newStatus })
-        .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
-    }
-
-    function filterOrders() {
-      const filterValue = document.getElementById("filter").value;
-      const filtered = filterValue === "all"
-        ? allOrders
-        : allOrders.filter(order => order.status === filterValue);
-      displayOrders(filtered);
-    }
-
-    function uploadLogo(event) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('logo').src = e.target.result;
-      };
-      reader.readAsDataURL(event.target.files[0]);
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        fetchOrders();
-      } else {
-        window.location.href = "login.html";
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "admin-login.html";
       }
     });
+
+    const db = firebase.firestore();
+
+    function renderOrder(doc) {
+      const data = doc.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data.name}</td>
+        <td>${data.phone}</td>
+        <td>${data.governorate || ''}</td>
+        <td>${data.product}</td>
+        <td>${data.quantity}</td>
+        <td>${data.address}</td>
+        <td>${new Date(data.createdAt?.seconds * 1000).toLocaleString()}</td>
+        <td>${data.status || 'قيد المعالجة'}</td>
+      `;
+      document.getElementById("ordersTableBody").appendChild(row);
+    }
+
+    db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+      const tableBody = document.getElementById("ordersTableBody");
+      tableBody.innerHTML = "";
+      snapshot.forEach(doc => renderOrder(doc));
+    });
+
+    // البحث
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const searchValue = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#ordersTableBody tr");
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(searchValue) ? "" : "none";
+      });
+    });
+
+    // استخراج إلى Excel
+    function exportToExcel() {
+      const table = document.querySelector("table");
+      const workbook = XLSX.utils.table_to_book(table, { sheet: "طلبات العملاء" });
+      XLSX.writeFile(workbook, "طلبات_العملاء.xlsx");
+    }
   </script>
 </body>
 </html>
-
