@@ -5,7 +5,6 @@
   <title>طلب المنتج</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* نفس الـ CSS الذي أرسلته سابقًا */
     body {
       font-family: 'Tahoma', sans-serif;
       background: linear-gradient(135deg, #f5f7fa, #d7e1ec);
@@ -256,9 +255,18 @@
   </div>
 
   <script type="module">
-    import { firebaseConfig } from './firebaseConfig.js';  // استدعاء الإعدادات من الملف الخارجي
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
+      authDomain: "gogo-580c9.firebaseapp.com",
+      projectId: "gogo-580c9",
+      storageBucket: "gogo-580c9.firebasestorage.app",
+      messagingSenderId: "1017270070832",
+      appId: "1:1017270070832:web:802137b9719a1c525747f5",
+      measurementId: "G-YRNMSSYD1W"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -298,3 +306,4 @@
   </script>
 </body>
 </html>
+
