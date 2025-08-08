@@ -167,42 +167,23 @@
 
   <div class="container">
     <img
-      src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-      alt="صورة سيارة كيا موديل 2017"
+      src=""
+      alt="صورة المنتج"
       class="main-img"
       id="mainImage"
     />
-    <div class="image-gallery">
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة جانبية"
-        onclick="changeMainImage(this.src)"
-      />
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة أمامية"
-        onclick="changeMainImage(this.src)"
-      />
-      <img
-        src="https://i.ibb.co/kFW1GpQ/2017-1200x800.jpg"
-        alt="صورة داخلية"
-        onclick="changeMainImage(this.src)"
-      />
+    <div class="image-gallery" id="imageGallery">
+      <!-- صور جانبية تظهر هنا -->
     </div>
 
-    <h2 id="productNameTitle">سيارة نوع كيا موديل 2017</h2>
+    <h2 id="productNameTitle">جارٍ تحميل المنتج...</h2>
 
-    <ul class="car-specs">
-      <li><strong>اللون:</strong> فضي</li>
-      <li><strong>عدد الكيلومترات:</strong> 120,000 كم</li>
-      <li><strong>ناقل الحركة:</strong> أوتوماتيك</li>
-      <li><strong>الحالة:</strong> بحالة ممتازة</li>
-      <li><strong>الوقود:</strong> بنزين</li>
-      <li><strong>الدفع:</strong> أمامي</li>
+    <ul class="car-specs" id="carSpecs">
+      <!-- مواصفات تظهر هنا -->
     </ul>
 
-    <div class="discount-price">بعد الخصم: 4,000,000 دينار عراقي فقط!</div>
-    <div class="price">السعر الأصلي: 4,550,000 دينار عراقي</div>
+    <div class="discount-price" id="discountPrice"></div>
+    <div class="price" id="price"></div>
 
     <form id="orderForm">
       <label for="name">الاسم الكامل</label>
@@ -253,7 +234,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
@@ -272,6 +253,50 @@
       document.getElementById('mainImage').src = src;
     }
 
+    async function loadProduct() {
+      const productRef = doc(db, "products", "product1"); // غير "product1" حسب معرف المنتج في Firestore
+      const productSnap = await getDoc(productRef);
+
+      if (productSnap.exists()) {
+        const product = productSnap.data();
+
+        // تحديث الاسم والصورة الرئيسية
+        document.getElementById('productNameTitle').textContent = product.name;
+        document.getElementById('mainImage').src = product.mainImage;
+
+        // تحديث الصور الجانبية (مع حدث تغيير الصورة الرئيسية)
+        const gallery = product.gallery || [];
+        const galleryContainer = document.getElementById('imageGallery');
+        galleryContainer.innerHTML = "";
+        gallery.forEach(src => {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = "صورة جانبية";
+          img.onclick = () => changeMainImage(src);
+          galleryContainer.appendChild(img);
+        });
+
+        // تحديث السعر والخصم
+        document.getElementById('price').textContent = product.price ? `السعر الأصلي: ${product.price.toLocaleString()} دينار عراقي` : "";
+        document.getElementById('discountPrice').textContent = product.discountPrice ? `بعد الخصم: ${product.discountPrice.toLocaleString()} دينار عراقي فقط!` : "";
+
+        // تحديث المواصفات (لو موجودة)
+        const specs = product.specs || [];
+        const specsList = document.getElementById('carSpecs');
+        specsList.innerHTML = "";
+        specs.forEach(spec => {
+          const li = document.createElement('li');
+          li.innerHTML = `<strong>${spec.label}:</strong> ${spec.value}`;
+          specsList.appendChild(li);
+        });
+      } else {
+        document.getElementById('productNameTitle').textContent = "المنتج غير موجود";
+        console.warn("المنتج غير موجود في Firestore");
+      }
+    }
+
+    loadProduct();
+
     document.getElementById('orderForm').addEventListener('submit', async function (event) {
       event.preventDefault();
 
@@ -282,7 +307,7 @@
         name: form.name.value.trim(),
         governorate: form.governorate.value,
         address1: form.address1.value.trim(),
-        address2: form.address2.value.trim(),
+        address2: form.address2 ? form.address2.value.trim() : "",
         landmark: form.landmark.value.trim(),
         phone1: form.phone1.value.trim(),
         phone2: form.phone2.value.trim(),
@@ -303,6 +328,3 @@
   </script>
 </body>
 </html>
-
-
-
