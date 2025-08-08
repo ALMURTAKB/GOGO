@@ -66,7 +66,7 @@
             <th class="p-3 text-right border-b">هاتف 1</th>
             <th class="p-3 text-right border-b">هاتف 2</th>
             <th class="p-3 text-right border-b">العنوان ١</th>
-            <th class="p-3 text-right border-b">العنوان ٢</th>
+            <th class="p-3 text-right border-b">اقرب نقطة دالة</th>
             <th class="p-3 text-right border-b">تاريخ ووقت الطلب</th>
             <th class="p-3 text-right border-b">الحالة</th>
             <th class="p-3 text-center border-b">تحديث الحالة</th>
@@ -143,7 +143,7 @@
         const phone1 = order.phone1 || "-";
         const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
         const address1 = order.address1 || "-";
-        const address2 = order.address2 || "-";
+        const landmark = order.landmark || "-";
         const status = order.status || "قيد التنفيذ";
         const createdAtFormatted = formatTimestamp(order.createdAt);
 
@@ -155,7 +155,7 @@
             <td class="p-3 border-b">${phone1}</td>
             <td class="p-3 border-b">${phone2}</td>
             <td class="p-3 border-b">${address1}</td>
-            <td class="p-3 border-b">${address2}</td>
+            <td class="p-3 border-b">${landmark}</td>
             <td class="p-3 border-b">${createdAtFormatted}</td>
             <td class="p-3 border-b">${status}</td>
             <td class="p-3 border-b text-center">
@@ -239,3 +239,4 @@
   </script>
 </body>
 </html>
+
