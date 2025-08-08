@@ -256,7 +256,7 @@
         const product = productSnap.data();
 
         // تحديث اسم المنتج
-        document.getElementById('productNameTitle').textContent = product.name || "اسم المنتج";
+        document.getElementById('name').textContent = product.name || "اسم المنتج";
 
         // تحديث الصورة الرئيسية
         document.getElementById('mainImage').src = product.image || "https://via.placeholder.com/1200x800?text=لا+يوجد+صورة";
@@ -312,3 +312,4 @@
   </script>
 </body>
 </html>
+
