@@ -146,16 +146,48 @@
     button:hover {
       background-color: #43a047;
     }
-    .confirmation {
-      display: none;
-      background-color: #dff0d8;
-      color: #3c763d;
-      padding: 12px;
-      border-radius: 10px;
+    /* رسالة التأكيد المنبثقة */
+    .confirmation-popup {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0,0,0,0.4);
+      display: none; /* مخفي افتراضياً */
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 0.5s ease;
+    }
+    .confirmation-box {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 35px 25px;
       text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(0, 128, 0, 0.1);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      max-width: 350px;
+      width: 90%;
+      animation: scaleUp 0.4s ease;
+    }
+    .confirmation-box .icon {
+      font-size: 45px;
+      color: #4CAF50;
+      margin-bottom: 15px;
+    }
+    .confirmation-box h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .confirmation-box p {
+      font-size: 16px;
+      color: #555;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleUp {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -226,61 +258,15 @@
 
       <button type="submit">إرسال الطلب</button>
     </form>
-
-    <div id="confirmationMessage" class="confirmation-popup">
-  <div class="confirmation-box">
-    <div class="icon">✅</div>
-    <h2>تم استلام طلبك بنجاح</h2>
-    <p>سنقوم بالتواصل معك قريبًا.</p>
   </div>
-</div>
 
-<style>
-  .confirmation-popup {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0,0,0,0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-    animation: fadeIn 0.5s ease;
-  }
-  .confirmation-box {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 35px 25px;
-    text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-    max-width: 350px;
-    width: 90%;
-    animation: scaleUp 0.4s ease;
-  }
-  .confirmation-box .icon {
-    font-size: 45px;
-    color: #4CAF50;
-    margin-bottom: 15px;
-  }
-  .confirmation-box h2 {
-    font-size: 22px;
-    margin-bottom: 10px;
-    color: #333;
-  }
-  .confirmation-box p {
-    font-size: 16px;
-    color: #555;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes scaleUp {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-</style>
-
+  <!-- رسالة التأكيد المنبثقة -->
+  <div id="confirmationMessage" class="confirmation-popup">
+    <div class="confirmation-box">
+      <div class="icon">✅</div>
+      <h2>تم استلام طلبك بنجاح</h2>
+      <p>سنقوم بالتواصل معك قريبًا.</p>
+    </div>
   </div>
 
   <script type="module">
@@ -328,10 +314,6 @@
 
     loadProductData();
 
-    function changeMainImage(src) {
-      document.getElementById('mainImage').src = src;
-    }
-
     document.getElementById('orderForm').addEventListener('submit', async function(event) {
       event.preventDefault();
 
@@ -353,15 +335,16 @@
       try {
         await addDoc(collection(db, "orders"), data);
 
-// عرض رسالة التأكيد
-document.getElementById('confirmationMessage').style.display = 'flex';
-window.scrollTo({ top: 0, behavior: 'smooth' });
-form.reset();
+        // عرض رسالة التأكيد
+        const confirmation = document.getElementById('confirmationMessage');
+        confirmation.style.display = 'flex';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        form.reset();
 
-// إخفاء الرسالة تلقائيًا بعد 5 ثوانٍ
-setTimeout(() => {
-  document.getElementById('confirmationMessage').style.display = 'none';
-}, 5000);
+        // إخفاء الرسالة تلقائيًا بعد 5 ثوانٍ
+        setTimeout(() => {
+          confirmation.style.display = 'none';
+        }, 5000);
 
       } catch (error) {
         alert("❌ حدث خطأ أثناء إرسال الطلب، حاول مرة أخرى.");
@@ -371,5 +354,3 @@ setTimeout(() => {
   </script>
 </body>
 </html>
-
-
