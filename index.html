@@ -172,18 +172,18 @@
       class="main-img"
       id="mainImage"
     />
-    <div class="image-gallery" id="imageGallery">
-      <!-- صور جانبية تظهر هنا -->
+    <div class="image-gallery" id="gallery">
+      <!-- صور المعرض تظهر هنا -->
     </div>
 
-    <h2 id="productNameTitle">جارٍ تحميل المنتج...</h2>
+    <h2 id="productNameTitle">تحميل المنتج...</h2>
 
-    <ul class="car-specs" id="carSpecs">
-      <!-- مواصفات تظهر هنا -->
+    <ul class="car-specs" id="specsList">
+      <!-- مواصفات المنتج تظهر هنا -->
     </ul>
 
     <div class="discount-price" id="discountPrice"></div>
-    <div class="price" id="price"></div>
+    <div class="price" id="originalPrice"></div>
 
     <form id="orderForm">
       <label for="name">الاسم الكامل</label>
@@ -234,13 +234,13 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
       authDomain: "gogo-580c9.firebaseapp.com",
       projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.firebasestorage.app",
+      storageBucket: "gogo-580c9.appspot.com",
       messagingSenderId: "1017270070832",
       appId: "1:1017270070832:web:802137b9719a1c525747f5",
       measurementId: "G-YRNMSSYD1W"
@@ -249,46 +249,48 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    function changeMainImage(src) {
-      document.getElementById('mainImage').src = src;
-    }
-
     async function loadProduct() {
-      const productRef = doc(db, "products", "product1"); // غير "product1" حسب معرف المنتج في Firestore
+      const productRef = doc(db, "products", "settings"); // تم تغيير هنا
       const productSnap = await getDoc(productRef);
 
       if (productSnap.exists()) {
         const product = productSnap.data();
 
-        // تحديث الاسم والصورة الرئيسية
-        document.getElementById('productNameTitle').textContent = product.name;
-        document.getElementById('mainImage').src = product.mainImage;
+        document.getElementById('productNameTitle').textContent = product.name || "اسم المنتج غير متوفر";
+        document.getElementById('mainImage').src = product.mainImage || "";
 
-        // تحديث الصور الجانبية (مع حدث تغيير الصورة الرئيسية)
-        const gallery = product.gallery || [];
-        const galleryContainer = document.getElementById('imageGallery');
-        galleryContainer.innerHTML = "";
-        gallery.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.alt = "صورة جانبية";
-          img.onclick = () => changeMainImage(src);
-          galleryContainer.appendChild(img);
-        });
+        // تحديث معرض الصور
+        const galleryDiv = document.getElementById('gallery');
+        galleryDiv.innerHTML = "";
+        if (Array.isArray(product.gallery)) {
+          product.gallery.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = "صورة المنتج";
+            img.style.width = "140px";
+            img.style.borderRadius = "10px";
+            img.style.margin = "0 5px";
+            img.style.cursor = "pointer";
+            img.onclick = () => {
+              document.getElementById('mainImage').src = src;
+            };
+            galleryDiv.appendChild(img);
+          });
+        }
 
-        // تحديث السعر والخصم
-        document.getElementById('price').textContent = product.price ? `السعر الأصلي: ${product.price.toLocaleString()} دينار عراقي` : "";
+        document.getElementById('originalPrice').textContent = product.price ? `السعر الأصلي: ${product.price.toLocaleString()} دينار عراقي` : "";
         document.getElementById('discountPrice').textContent = product.discountPrice ? `بعد الخصم: ${product.discountPrice.toLocaleString()} دينار عراقي فقط!` : "";
 
-        // تحديث المواصفات (لو موجودة)
-        const specs = product.specs || [];
-        const specsList = document.getElementById('carSpecs');
+        // تحديث المواصفات
+        const specsList = document.getElementById('specsList');
         specsList.innerHTML = "";
-        specs.forEach(spec => {
-          const li = document.createElement('li');
-          li.innerHTML = `<strong>${spec.label}:</strong> ${spec.value}`;
-          specsList.appendChild(li);
-        });
+        if (Array.isArray(product.specs)) {
+          product.specs.forEach(spec => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${spec.label}:</strong> ${spec.value}`;
+            specsList.appendChild(li);
+          });
+        }
       } else {
         document.getElementById('productNameTitle').textContent = "المنتج غير موجود";
         console.warn("المنتج غير موجود في Firestore");
@@ -297,10 +299,10 @@
 
     loadProduct();
 
-    document.getElementById('orderForm').addEventListener('submit', async function (event) {
+    document.getElementById('orderForm').addEventListener('submit', async (event) => {
       event.preventDefault();
 
-      const form = this;
+      const form = event.target;
       const productName = document.getElementById('productNameTitle').textContent.trim();
 
       const data = {
