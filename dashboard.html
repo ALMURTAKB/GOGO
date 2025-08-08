@@ -1,255 +1,175 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>لوحة تحكم الطلبات</title>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
+    authDomain: "gogo-580c9.firebaseapp.com",
+    projectId: "gogo-580c9",
+    storageBucket: "gogo-580c9.appspot.com",
+    messagingSenderId: "1017270070832",
+    appId: "1:1017270070832:web:802137b9719a1c525747f5",
+  };
 
-  <!-- Header -->
-  <header class="bg-blue-600 text-white flex justify-between items-center px-6 py-4 shadow">
-    <div class="flex items-center gap-4">
-      <input type="file" id="logoUploader" class="hidden" onchange="uploadLogo(event)" />
-      <img id="logo" src="https://ibb.co/DP9MRMY7" alt="Logo" class="h-10 w-10 rounded-full cursor-pointer" onclick="document.getElementById('logoUploader').click()">
-      <h1 class="text-2xl font-bold">لوحة تحكم الطلبات</h1>
-    </div>
-    <div class="flex items-center gap-4">
-      <input type="text" id="searchInput" placeholder="ابحث..." class="p-2 rounded text-black">
-      <button onclick="exportToExcel()" class="bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition">📤 استخراج Excel</button>
-      <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600 transition">تسجيل الخروج</button>
-    </div>
-  </header>
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
 
-  <!-- Main -->
-  <div class="flex flex-1">
+  let allOrders = [];
+  let isAdmin = false; // حالة صلاحية المدير
 
-    <!-- Sidebar Filter -->
-    <aside class="w-64 bg-white p-4 shadow">
-      <h2 class="text-xl font-semibold mb-4">تصفية الطلبات</h2>
-      <select id="filter" onchange="filterOrders()" class="w-full p-2 border border-gray-300 rounded">
-        <option value="all">الكل</option>
-        <option value="قيد التنفيذ">قيد التنفيذ</option>
-        <option value="ملغي">ملغي</option>
-        <option value="مكتمل ✅">مكتمل</option>
-      </select>
+  function logout() {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  }
 
-      <h2 class="text-xl font-semibold mt-6 mb-2">بيانات المنتج</h2>
-      <label class="text-sm">اسم المنتج</label>
-      <input id="productName" class="w-full p-2 border rounded mb-2" placeholder="مثلاً: كيا 2017" />
+  function formatTimestamp(timestamp) {
+    if (!timestamp) return "-";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleString("ar-EG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  }
 
-      <label class="text-sm">رابط صورة المنتج</label>
-      <input id="productImage" class="w-full p-2 border rounded mb-2" placeholder="https://..." />
+  function fetchOrders() {
+    db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+      allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      displayOrders(allOrders);
+    });
+  }
 
-      <label class="text-sm">السعر الأصلي</label>
-      <input id="originalPrice" type="number" class="w-full p-2 border rounded mb-2" placeholder="مثلاً: 4550000" />
+  function displayOrders(orders) {
+    const ordersContainer = document.getElementById("orders");
+    if (orders.length === 0) {
+      ordersContainer.innerHTML = '<tr><td colspan="11" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
+      return;
+    }
 
-      <label class="text-sm">السعر بعد الخصم</label>
-      <input id="discountPrice" type="number" class="w-full p-2 border rounded mb-2" placeholder="مثلاً: 4000000" />
+    let html = "";
+    orders.forEach(order => {
+      const name = order.name || "-";
+      const productName = order.productName || "-";
+      const governorate = order.governorate || "-";
+      const phone1 = order.phone1 || "-";
+      const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
+      const address1 = order.address1 || "-";
+      const landmark = order.landmark || "-";
+      const status = order.status || "قيد التنفيذ";
+      const createdAtFormatted = formatTimestamp(order.createdAt);
 
-      <button onclick="saveProductData()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">💾 حفظ المنتج</button>
-    </aside>
+      html += `
+        <tr class="hover:bg-gray-50">
+          <td class="p-3 border-b">${name}</td>
+          <td class="p-3 border-b">${productName}</td>
+          <td class="p-3 border-b">${governorate}</td>
+          <td class="p-3 border-b">${phone1}</td>
+          <td class="p-3 border-b">${phone2}</td>
+          <td class="p-3 border-b">${address1}</td>
+          <td class="p-3 border-b">${landmark}</td>
+          <td class="p-3 border-b">${createdAtFormatted}</td>
+          <td class="p-3 border-b">${status}</td>
+          <td class="p-3 border-b text-center">
+            <select onchange="toggleStatus('${order.id}', this.value)" class="border rounded px-2 py-1 cursor-pointer">
+              <option value="قيد التنفيذ" ${status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
+              <option value="مكتمل ✅" ${status === 'مكتمل ✅' ? 'selected' : ''}>مكتمل ✅</option>
+              <option value="ملغي" ${status === 'ملغي' ? 'selected' : ''}>ملغي</option>
+            </select>
+          </td>
+          <td class="p-3 border-b text-center">
+            ${isAdmin ? `<button onclick="deleteOrder('${order.id}')" class="text-red-600 hover:text-red-800">🗑 حذف</button>` : ''}
+          </td>
+        </tr>
+      `;
+    });
 
-    <!-- Orders Table -->
-    <main class="flex-1 p-6 overflow-auto">
-      <table class="w-full table-auto border-collapse bg-white rounded-lg overflow-hidden shadow">
-        <thead class="bg-blue-100 text-blue-900">
-          <tr>
-            <th class="p-3 text-right border-b">اسم العميل</th>
-            <th class="p-3 text-right border-b">المنتج</th>
-            <th class="p-3 text-right border-b">المحافظة</th>
-            <th class="p-3 text-right border-b">هاتف 1</th>
-            <th class="p-3 text-right border-b">هاتف 2</th>
-            <th class="p-3 text-right border-b">العنوان ١</th>
-            <th class="p-3 text-right border-b">اقرب نقطة دالة</th>
-            <th class="p-3 text-right border-b">تاريخ ووقت الطلب</th>
-            <th class="p-3 text-right border-b">الحالة</th>
-            <th class="p-3 text-center border-b">تحديث الحالة</th>
-            <th class="p-3 text-center border-b">حذف</th>
-          </tr>
-        </thead>
-        <tbody id="orders" class="text-gray-800">
-          <!-- الطلبات تظهر هنا -->
-        </tbody>
-      </table>
-    </main>
-  </div>
+    ordersContainer.innerHTML = html;
+  }
 
-  <!-- Footer -->
-  <footer class="text-center text-sm text-gray-600 mt-6 mb-2">
-    تم برمجته من قبل <span class="font-semibold text-blue-700">المرتقب</span> باستخدام الذكاء الاصطناعي.
-  </footer>
+  function toggleStatus(id, newStatus) {
+    db.collection("orders").doc(id).update({ status: newStatus })
+      .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
+  }
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
-      authDomain: "gogo-580c9.firebaseapp.com",
-      projectId: "gogo-580c9",
-      storageBucket: "gogo-580c9.appspot.com",
-      messagingSenderId: "1017270070832",
-      appId: "1:1017270070832:web:802137b9719a1c525747f5",
+  function deleteOrder(id) {
+    if (!isAdmin) {
+      alert("غير مصرح لك بحذف الطلبات.");
+      return;
+    }
+    if (confirm("هل أنت متأكد من حذف هذا الطلب؟")) {
+      db.collection("orders").doc(id).delete()
+        .then(() => alert("تم حذف الطلب بنجاح"))
+        .catch(err => alert("خطأ في حذف الطلب: " + err.message));
+    }
+  }
+
+  function filterOrders() {
+    const filterValue = document.getElementById("filter").value;
+    const filtered = filterValue === "all"
+      ? allOrders
+      : allOrders.filter(order => order.status === filterValue);
+    displayOrders(filtered);
+  }
+
+  function uploadLogo(event) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('logo').src = e.target.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
+  function exportToExcel() {
+    const filteredOrders = document.querySelectorAll("#orders tr");
+    if (!filteredOrders.length) return alert("لا يوجد بيانات للتصدير.");
+
+    const table = document.createElement("table");
+    table.innerHTML = document.querySelector("thead").outerHTML + document.querySelector("#orders").outerHTML;
+
+    const workbook = XLSX.utils.table_to_book(table, { sheet: "الطلبات" });
+    XLSX.writeFile(workbook, "طلبات.xlsx");
+  }
+
+  function saveProductData() {
+    const name = document.getElementById("productName").value;
+    const image = document.getElementById("productImage").value;
+    const originalPrice = document.getElementById("originalPrice").value;
+    const discountPrice = document.getElementById("discountPrice").value;
+
+    const productData = {
+      name,
+      image,
+      originalPrice,
+      discountPrice,
+      updatedAt: new Date()
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    db.collection("settings").doc("product").set(productData)
+      .then(() => alert("✅ تم تحديث بيانات المنتج بنجاح"))
+      .catch(error => alert("❌ فشل في التحديث: " + error.message));
+  }
 
-    function logout() {
-      auth.signOut().then(() => {
-        window.location.href = "login.html";
-      });
-    }
-
-    function formatTimestamp(timestamp) {
-      if (!timestamp) return "-";
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-      return date.toLocaleString("ar-EG", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-      });
-    }
-
-    let allOrders = [];
-
-    function fetchOrders() {
-      db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        displayOrders(allOrders);
-      });
-    }
-
-    function displayOrders(orders) {
-      const ordersContainer = document.getElementById("orders");
-      ordersContainer.innerHTML = "";
-
-      if (orders.length === 0) {
-        ordersContainer.innerHTML = '<tr><td colspan="11" class="text-center p-4 text-gray-500">لا توجد طلبات</td></tr>';
-        return;
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      // جلب بيانات المستخدم للتأكد من الصلاحية
+      try {
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          isAdmin = userData.isAdmin === true;
+        } else {
+          isAdmin = false;
+        }
+      } catch (error) {
+        console.error("خطأ في جلب بيانات المستخدم:", error);
+        isAdmin = false;
       }
-
-      orders.forEach(order => {
-        const name = order.name || "-";
-        const productName = order.productName || "-";
-        const governorate = order.governorate || "-";
-        const phone1 = order.phone1 || "-";
-        const phone2 = (order.phone2 && order.phone2.trim() !== "") ? order.phone2 : "-";
-        const address1 = order.address1 || "-";
-        const landmark = order.landmark || "-";
-        const status = order.status || "قيد التنفيذ";
-        const createdAtFormatted = formatTimestamp(order.createdAt);
-
-        ordersContainer.innerHTML += `
-          <tr class="hover:bg-gray-50">
-            <td class="p-3 border-b">${name}</td>
-            <td class="p-3 border-b">${productName}</td>
-            <td class="p-3 border-b">${governorate}</td>
-            <td class="p-3 border-b">${phone1}</td>
-            <td class="p-3 border-b">${phone2}</td>
-            <td class="p-3 border-b">${address1}</td>
-            <td class="p-3 border-b">${landmark}</td>
-            <td class="p-3 border-b">${createdAtFormatted}</td>
-            <td class="p-3 border-b">${status}</td>
-            <td class="p-3 border-b text-center">
-              <select onchange="toggleStatus('${order.id}', this.value)" class="border rounded px-2 py-1 cursor-pointer">
-                <option value="قيد التنفيذ" ${status === 'قيد التنفيذ' ? 'selected' : ''}>قيد التنفيذ</option>
-                <option value="مكتمل ✅" ${status === 'مكتمل ✅' ? 'selected' : ''}>مكتمل ✅</option>
-                <option value="ملغي" ${status === 'ملغي' ? 'selected' : ''}>ملغي</option>
-              </select>
-            </td>
-            <td class="p-3 border-b text-center">
-              <button onclick="deleteOrder('${order.id}')" class="text-red-600 hover:text-red-800">🗑 حذف</button>
-            </td>
-          </tr>
-        `;
-      });
+      fetchOrders();
+    } else {
+      window.location.href = "login.html";
     }
-
-    function toggleStatus(id, newStatus) {
-      db.collection("orders").doc(id).update({ status: newStatus })
-        .catch(err => alert("خطأ في تحديث الحالة: " + err.message));
-    }
-
-    function deleteOrder(id) {
-      if (confirm("هل أنت متأكد من حذف هذا الطلب؟")) {
-        db.collection("orders").doc(id).delete()
-          .then(() => alert("تم حذف الطلب بنجاح"))
-          .catch(err => alert("خطأ في حذف الطلب: " + err.message));
-      }
-    }
-
-    function filterOrders() {
-      const filterValue = document.getElementById("filter").value;
-      const filtered = filterValue === "all"
-        ? allOrders
-        : allOrders.filter(order => order.status === filterValue);
-      displayOrders(filtered);
-    }
-
-    function uploadLogo(event) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('logo').src = e.target.result;
-      };
-      reader.readAsDataURL(event.target.files[0]);
-    }
-
-    function exportToExcel() {
-      const filteredOrders = document.querySelectorAll("#orders tr");
-      if (!filteredOrders.length) return alert("لا يوجد بيانات للتصدير.");
-
-      const table = document.createElement("table");
-      table.innerHTML = document.querySelector("thead").outerHTML + document.querySelector("#orders").outerHTML;
-
-      const workbook = XLSX.utils.table_to_book(table, { sheet: "الطلبات" });
-      XLSX.writeFile(workbook, "طلبات.xlsx");
-    }
-
-    document.getElementById("searchInput").addEventListener("input", function () {
-      const value = this.value.toLowerCase();
-      const filtered = allOrders.filter(order => {
-        return Object.values(order).some(val => typeof val === 'string' && val.toLowerCase().includes(value));
-      });
-      displayOrders(filtered);
-    });
-
-    function saveProductData() {
-      const name = document.getElementById("productName").value;
-      const image = document.getElementById("productImage").value;
-      const originalPrice = document.getElementById("originalPrice").value;
-      const discountPrice = document.getElementById("discountPrice").value;
-
-      const productData = {
-        name,
-        image,
-        originalPrice,
-        discountPrice,
-        updatedAt: new Date()
-      };
-
-      db.collection("settings").doc("product").set(productData)
-        .then(() => alert("✅ تم تحديث بيانات المنتج بنجاح"))
-        .catch(error => alert("❌ فشل في التحديث: " + error.message));
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        fetchOrders();
-      } else {
-        window.location.href = "login.html";
-      }
-    });
-  </script>
-</body>
-</html>
-
-
+  });
+</script>
