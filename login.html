@@ -4,46 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>تسجيل دخول المشرف</title>
-
-  <!-- Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
   <div class="bg-white p-10 rounded-lg shadow-lg w-full max-w-sm">
     <h2 class="text-3xl font-bold mb-8 text-center text-green-700">تسجيل دخول المشرف</h2>
 
-    <input
-      id="email"
-      type="email"
-      placeholder="البريد الإلكتروني"
-      class="w-full mb-5 p-3 border border-green-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-    />
+    <input id="email" type="email" placeholder="البريد الإلكتروني" class="w-full mb-5 p-3 border border-green-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-    <input
-      id="password"
-      type="password"
-      placeholder="كلمة المرور"
-      class="w-full mb-6 p-3 border border-green-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-    />
+    <input id="password" type="password" placeholder="كلمة المرور" class="w-full mb-6 p-3 border border-green-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-    <button
-      onclick="login()"
-      class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md font-semibold transition duration-300"
-    >
+    <button onclick="login()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-md font-semibold transition duration-300">
       تسجيل الدخول
     </button>
 
     <p id="error" class="text-red-600 text-center mt-4 text-sm"></p>
   </div>
 
-  <!-- استدعاء ملف تكوين Firebase -->
-  <script src="./firebaseConfig.js"></script>
-
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxZKjnVEVjVBbgwAOUUbEg9D4KbEJqUG4",
+      authDomain: "gogo-580c9.firebaseapp.com",
+      projectId: "gogo-580c9",
+      storageBucket: "gogo-580c9.appspot.com",
+      messagingSenderId: "1017270070832",
+      appId: "1:1017270070832:web:802137b9719a1c525747f5",
+    };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
@@ -62,18 +51,12 @@
         .then(() => {
           window.location.href = "dashboard.html";
         })
-        .catch((error) => {
+        .catch(() => {
           errorMsg.textContent = "فشل تسجيل الدخول. تأكد من البريد الإلكتروني وكلمة المرور.";
-          console.error("Firebase Auth Error:", error);
         });
     }
-
-    // إذا كان المستخدم مسجل دخول بالفعل، يوجه مباشرة للوحة التحكم
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        window.location.href = "dashboard.html";
-      }
-    });
   </script>
+
 </body>
 </html>
+
